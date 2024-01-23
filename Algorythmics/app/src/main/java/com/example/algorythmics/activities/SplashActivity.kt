@@ -59,10 +59,10 @@ class SplashActivity : AppCompatActivity() {
         Log.d(TAG, "onDestroy method called")
     }
 
-    override fun onRestart() {
-        super.onRestart()
-        Log.d(TAG, "onRestart method called")
-    }
+//    override fun onRestart() {
+//        super.onRestart()
+//        Log.d(TAG, "onRestart method called")
+//    }
 
 
 }
