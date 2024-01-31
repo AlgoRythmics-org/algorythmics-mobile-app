@@ -10,8 +10,10 @@ import com.example.algorythmics.R
 import com.example.algorythmics.retrofit.models.AlgorithmModel
 
 class AlgorithmAdapter(
-    private var algorithms: List<AlgorithmModel>
+    var algorithms: List<AlgorithmModel>
 ) : RecyclerView.Adapter<AlgorithmAdapter.AlgorithmViewHolder>() {
+
+    private var filteredAlgorithms: MutableList<AlgorithmModel> = algorithms.toMutableList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlgorithmViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -20,13 +22,13 @@ class AlgorithmAdapter(
     }
 
     override fun onBindViewHolder(holder: AlgorithmViewHolder, position: Int) {
-        val algorithm = algorithms[position]
+        val algorithm = filteredAlgorithms[position]
         holder.textView.text = algorithm.algorithmName
         holder.textView2.text = algorithm.description
     }
 
     override fun getItemCount(): Int {
-        return algorithms.size
+        return filteredAlgorithms.size
     }
 
     class AlgorithmViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -34,8 +36,22 @@ class AlgorithmAdapter(
         val textView2: TextView = itemView.findViewById(R.id.algorithmDescription)
     }
 
+    fun filter(text: String) {
+        filteredAlgorithms.clear()
+        if (text.isBlank()) {
+            filteredAlgorithms.addAll(algorithms)
+        } else {
+            filteredAlgorithms.addAll(algorithms.filter {
+                it.algorithmName.contains(text, ignoreCase = true)
+            })
+        }
+        notifyDataSetChanged()
+    }
+
+
+
     fun updateData(newAlgorithms: List<AlgorithmModel>) {
         algorithms = newAlgorithms
-        notifyDataSetChanged()
+        filter("")
     }
 }
