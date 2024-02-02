@@ -1,4 +1,3 @@
-
 package com.example.algorythmics.adapters
 
 import android.view.LayoutInflater
@@ -10,7 +9,8 @@ import com.example.algorythmics.R
 import com.example.algorythmics.retrofit.models.AlgorithmModel
 
 class AlgorithmAdapter(
-    var algorithms: List<AlgorithmModel>
+    var algorithms: List<AlgorithmModel>,
+    private val onClickListener: (AlgorithmModel) -> Unit
 ) : RecyclerView.Adapter<AlgorithmAdapter.AlgorithmViewHolder>() {
 
     private var filteredAlgorithms: MutableList<AlgorithmModel> = algorithms.toMutableList()
@@ -25,6 +25,10 @@ class AlgorithmAdapter(
         val algorithm = filteredAlgorithms[position]
         holder.textView.text = algorithm.algorithmName
         holder.textView2.text = algorithm.description
+
+        holder.itemView.setOnClickListener{
+            onClickListener.invoke(algorithm)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -52,6 +56,8 @@ class AlgorithmAdapter(
 
     fun updateData(newAlgorithms: List<AlgorithmModel>) {
         algorithms = newAlgorithms
-        filter("")
+        filteredAlgorithms.clear()
+        filteredAlgorithms.addAll(algorithms)
+        notifyDataSetChanged()
     }
 }

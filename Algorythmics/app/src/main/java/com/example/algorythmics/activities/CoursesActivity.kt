@@ -5,6 +5,7 @@ import android.os.Bundle
 import com.example.algorythmics.R
 import com.example.algorythmics.fragments.course.CoursesFragment
 
+
 class CoursesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -1,14 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:weightSum="5"
+    android:background="@color/pale_blue"
     android:layout_height="match_parent"
     tools:context=".fragments.course.CoursesDetailFragment">
-
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        >
+        <ImageView
+            android:id="@+id/learninstepimage"
+            android:src="@drawable/learning_step"
+            android:layout_centerInParent="true"
+            android:layout_width="300dp"
+            android:layout_height="200dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Learning steps"
+            android:textColor="@color/black"
+            android:layout_centerHorizontal="true"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_below="@id/learninstepimage"/>
+    </RelativeLayout>
 
-</FrameLayout>
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/background_bg"
+        android:rowCount="2"
+        android:padding="10dp"
+        android:columnCount="2"
+        android:layout_weight="3">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/video"
+            android:layout_width="0dp"
+            android:layout_margin="10dp"
+            app:cardElevation="4dp"
+            android:layout_height="0dp"
+            app:cardCornerRadius="4dp"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:padding="10dp"
+                android:layout_height="match_parent">
+
+
+            <ImageView
+                android:id="@+id/videoimage"
+                android:layout_width="80dp"
+                android:src="@drawable/video_turquoise"
+                android:layout_height="80dp"
+                android:layout_centerInParent="true"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/videoimage"
+                android:layout_marginTop="20dp"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:text="Video"
+                android:layout_centerHorizontal="true" />
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/animation"
+            android:layout_width="0dp"
+            android:layout_margin="10dp"
+            app:cardElevation="4dp"
+            android:layout_height="0dp"
+            app:cardCornerRadius="4dp"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:padding="10dp"
+                android:layout_height="match_parent">
+
+
+                <ImageView
+                    android:id="@+id/imageAnimation"
+                    android:layout_width="80dp"
+                    android:src="@drawable/animation_turquoise"
+                    android:layout_height="80dp"
+                    android:layout_centerInParent="true"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/imageAnimation"
+                    android:layout_marginTop="20dp"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:text="Animation"
+                    android:layout_centerHorizontal="true" />
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/code"
+            android:layout_width="0dp"
+            android:layout_margin="10dp"
+            app:cardElevation="4dp"
+            android:layout_height="0dp"
+            app:cardCornerRadius="4dp"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:padding="10dp"
+                android:layout_height="match_parent">
+
+
+                <ImageView
+                    android:id="@+id/imageCode"
+                    android:layout_width="80dp"
+                    android:src="@drawable/create_code_turquoise"
+                    android:layout_height="80dp"
+                    android:layout_centerInParent="true"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/imageCode"
+                    android:layout_marginTop="20dp"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:text="Code"
+                    android:layout_centerHorizontal="true" />
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/quiz"
+            android:layout_width="0dp"
+            android:layout_margin="10dp"
+            app:cardElevation="4dp"
+            android:layout_height="0dp"
+            app:cardCornerRadius="4dp"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:padding="10dp"
+                android:layout_height="match_parent">
+
+
+                <ImageView
+                    android:id="@+id/imageQuiz"
+                    android:layout_width="80dp"
+                    android:src="@drawable/quiz_turquoise"
+                    android:layout_height="80dp"
+                    android:layout_centerInParent="true"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/imageQuiz"
+                    android:layout_marginTop="20dp"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:text="Quiz"
+                    android:layout_centerHorizontal="true"/>
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+
+
+    </GridLayout>
+
+ 
+
+</LinearLayout>

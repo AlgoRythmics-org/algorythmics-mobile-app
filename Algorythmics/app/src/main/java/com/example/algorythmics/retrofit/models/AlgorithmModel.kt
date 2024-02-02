@@ -22,4 +22,12 @@ data class AlgorithmModel(
     @SerializedName("learning_steps")
     val learningSteps: String
 
-)
+
+){
+
+    fun matchesSearchQuery(query: String): Boolean {
+        return algorithmName.contains(query, ignoreCase = true)
+    }
+}
+
+
