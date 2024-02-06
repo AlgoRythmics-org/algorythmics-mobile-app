@@ -92,7 +92,7 @@ class CoursesFragment : Fragment() {
 
     private fun onAlgorithmClicked(algorithm: AlgorithmModel) {
         val bundle = Bundle().apply {
-            putString("algorithm", algorithm.algorithmId)
+            putString("algorithmId", algorithm.algorithmId)
         }
 
         val detailFragment = CoursesDetailFragment().apply {
@@ -100,11 +100,12 @@ class CoursesFragment : Fragment() {
         }
 
         parentFragmentManager.beginTransaction()
-            .add(R.id.fragmentContainer, detailFragment) // Add instead of replace
-            .hide(this@CoursesFragment) // Hide the current fragment
+            .add(R.id.fragmentContainer, detailFragment)
+            .hide(this@CoursesFragment)
             .addToBackStack(null)
             .commit()
     }
+
 
     override fun onResume() {
         super.onResume()

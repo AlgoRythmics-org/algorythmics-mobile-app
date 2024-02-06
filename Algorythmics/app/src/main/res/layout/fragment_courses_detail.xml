@@ -56,7 +56,7 @@
 
 
             <ImageView
-                android:id="@+id/videoimage"
+                android:id="@+id/videoImage"
                 android:layout_width="80dp"
                 android:src="@drawable/video_turquoise"
                 android:layout_height="80dp"
@@ -64,7 +64,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/videoimage"
+                android:layout_below="@+id/videoImage"
                 android:layout_marginTop="20dp"
                 android:textSize="18sp"
                 android:textColor="@color/black"

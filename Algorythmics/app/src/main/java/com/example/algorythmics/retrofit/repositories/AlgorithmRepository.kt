@@ -7,7 +7,7 @@ import retrofit2.Response
 
 class AlgorithmRepository {
 
-    suspend fun getOneAlgorithmById(id: Long): AlgorithmModel? {
+    suspend fun getOneAlgorithmById(id: String): AlgorithmModel? {
         try{
             return ApiClient.apiService.getOneAlgorithmById(id)
         }catch (e : Exception){
