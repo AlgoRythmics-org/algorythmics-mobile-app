@@ -16,6 +16,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 import kotlinx.coroutines.launch
 
 class VideoFragment : Fragment() {
+
     private lateinit var binding: FragmentVideoBinding
     private val videoRepository = VideoRepository()
 
@@ -54,6 +55,7 @@ class VideoFragment : Fragment() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 val videoId = getVideoIdFromLink(video.link)
                 youTubePlayer.loadVideo(videoId, 0f)
+                binding.textViewTitle.text = video.videoName
             }
         })
     }

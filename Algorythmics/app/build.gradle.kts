@@ -44,6 +44,10 @@ dependencies {
 
     implementation("com.google.android.exoplayer:exoplayer:2.19.1")
     implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+
+
+
 
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")

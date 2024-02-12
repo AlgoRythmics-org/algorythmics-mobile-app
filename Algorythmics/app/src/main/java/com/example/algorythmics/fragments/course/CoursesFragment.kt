@@ -1,5 +1,6 @@
 package com.example.algorythmics.fragments.course
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -105,6 +106,7 @@ class CoursesFragment : Fragment() {
             .addToBackStack(null)
             .commit()
     }
+
 
 
     override fun onResume() {

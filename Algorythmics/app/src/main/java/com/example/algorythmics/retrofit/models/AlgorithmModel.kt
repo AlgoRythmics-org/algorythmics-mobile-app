@@ -1,6 +1,7 @@
 package com.example.algorythmics.retrofit.models
 
 import com.google.gson.annotations.SerializedName
+import java.nio.Buffer
 
 data class AlgorithmModel(
     @SerializedName("_id")
@@ -20,7 +21,11 @@ data class AlgorithmModel(
     @SerializedName("implementation_type")
     val implementationType: String,
     @SerializedName("learning_steps")
-    val learningSteps: String
+    val learningSteps: String,
+    @SerializedName("image_file")
+    val imageFile: String?,
+    @SerializedName("detail_description")
+    val detailDescription: String?
 
 
 ){
