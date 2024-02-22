@@ -1,5 +1,4 @@
 package com.example.algorythmics.fragments.course
-
 import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
@@ -10,7 +9,6 @@ import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.lifecycle.lifecycleScope
 import com.example.algorythmics.R
-import com.example.algorythmics.fragments.course.VideoFragment
 import com.example.algorythmics.retrofit.repositories.AlgorithmRepository
 import kotlinx.coroutines.launch
 
@@ -79,8 +77,13 @@ class CoursesDetailFragment : Fragment() {
         }
 
         animationCardView.setOnClickListener {
-            navigateToFragment(AnimationFragment())
+            val animationFragment = AnimationFragment()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, animationFragment)
+                .addToBackStack(null)
+                .commit()
         }
+
 
         codeCardView.setOnClickListener {
             navigateToFragment(CodeFragment())
@@ -100,5 +103,7 @@ class CoursesDetailFragment : Fragment() {
         transaction.addToBackStack(null)
         transaction.commit()
     }
+
+
 
 }

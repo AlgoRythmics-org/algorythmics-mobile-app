@@ -42,21 +42,34 @@ android {
 
 dependencies {
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
+
+
     implementation("com.google.android.exoplayer:exoplayer:2.19.1")
     implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
+
+    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.4.0")
+
+
+    implementation("androidx.compose.ui:ui:1.0.5")
+    implementation ("androidx.compose.material:material:1.0.5")
+    implementation ("androidx.compose.ui:ui-tooling:1.0.5")
 
 
 
 
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
-    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
     implementation("androidx.fragment:fragment-ktx:1.3.0")
 
     //retrofit
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.8.9")
+    implementation("androidx.compose.ui:ui-android:1.6.1")
+    implementation("androidx.compose.material3:material3-android:1.2.0")
 
     kapt("androidx.room:room-compiler:2.6.0")
 
