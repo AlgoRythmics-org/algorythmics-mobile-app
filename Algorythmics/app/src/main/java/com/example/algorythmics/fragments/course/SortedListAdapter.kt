@@ -1,15 +1,15 @@
-package com.example.algorythmics.fragments.course
-
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
 import com.example.algorythmics.presentation.ListUiItem
 
-class SortedListAdapter (private val items: List<ListUiItem>) :
-RecyclerView.Adapter<SortedListAdapter.ViewHolder>() {
+class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(DiffCallback) {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView: TextView = itemView.findViewById(R.id.text_view)
@@ -22,12 +22,20 @@ RecyclerView.Adapter<SortedListAdapter.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
+        val item = getItem(position)
         holder.textView.text = item.value.toString()
-        // Adjust other view properties based on your item's properties
+        holder.itemView.setBackgroundColor(if (item.isCurrentlyCompared) Color.YELLOW else Color.TRANSPARENT)
     }
 
-    override fun getItemCount(): Int {
-        return items.size
+    companion object {
+        private val DiffCallback = object : DiffUtil.ItemCallback<ListUiItem>() {
+            override fun areItemsTheSame(oldItem: ListUiItem, newItem: ListUiItem): Boolean {
+                return oldItem.id == newItem.id
+            }
+
+            override fun areContentsTheSame(oldItem: ListUiItem, newItem: ListUiItem): Boolean {
+                return oldItem == newItem
+            }
+        }
     }
 }
