@@ -77,12 +77,20 @@ class CoursesDetailFragment : Fragment() {
         }
 
         animationCardView.setOnClickListener {
-            val animationFragment = AnimationFragment()
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, animationFragment)
-                .addToBackStack(null)
-                .commit()
+            val algorithmId = arguments?.getString("algorithmId")
+            if (algorithmId != null) {
+                val animationFragment = AnimationFragment().apply {
+                    arguments = Bundle().apply {
+                        putString("algorithmId", algorithmId)
+                    }
+                }
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainer, animationFragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
         }
+
 
 
         codeCardView.setOnClickListener {

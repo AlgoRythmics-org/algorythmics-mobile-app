@@ -1,4 +1,7 @@
+package com.example.algorythmics.fragments.course
+
 import android.graphics.Color
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,11 +24,23 @@ class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(
         return ViewHolder(view)
     }
 
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
         holder.textView.text = item.value.toString()
-        holder.itemView.setBackgroundColor(if (item.isCurrentlyCompared) Color.YELLOW else Color.TRANSPARENT)
+
+        holder.textView.gravity = Gravity.CENTER
+
+        val initialColor = Color.parseColor("#1BDBBE")
+
+        val comparisonColor = Color.parseColor("#FF5733")
+
+        // Az aktuális elem háttérszíne az összehasonlítás alapján
+        val backgroundColor = if (item.isCurrentlyCompared) comparisonColor else initialColor
+
+        holder.itemView.setBackgroundColor(backgroundColor)
     }
+
 
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<ListUiItem>() {

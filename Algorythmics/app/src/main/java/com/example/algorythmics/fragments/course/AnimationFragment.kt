@@ -1,6 +1,5 @@
 package com.example.algorythmics.fragments.course
-import SortViewModel
-import SortedListAdapter
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,13 +11,15 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
-
+import com.example.algorythmics.presentation.InsertionSortViewModel
+import com.example.algorythmics.presentation.SortViewModel
 
 
 class AnimationFragment : Fragment() {
 
 
     private val sortViewModel: SortViewModel by activityViewModels()
+    private val insertionSortViewModel: InsertionSortViewModel by activityViewModels()
     private lateinit var btnSortList: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var sortedListAdapter: SortedListAdapter
@@ -36,12 +37,12 @@ class AnimationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         btnSortList = view.findViewById(R.id.btn_sort_list)
-        recyclerView = view.findViewById(R.id.rv_sorted_list)
+        recyclerView = view.findViewById(R.id.rv_container)
 
 
 
         btnSortList.setOnClickListener {
-            sortViewModel.startSorting()
+            insertionSortViewModel.startSorting()
         }
 
         sortedListAdapter = SortedListAdapter()
@@ -50,7 +51,7 @@ class AnimationFragment : Fragment() {
             adapter = sortedListAdapter
         }
 
-        sortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
+            insertionSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
             sortedListAdapter.submitList(it)
         })
     }
