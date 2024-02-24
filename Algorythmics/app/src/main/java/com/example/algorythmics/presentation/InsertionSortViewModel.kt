@@ -27,7 +27,7 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
         _listToSort.value = list
     }
 
-    fun startSorting() {
+    fun startInsertionSorting() {
         viewModelScope.launch {
             _listToSort.value?.let { list ->
                 insertionSortUseCase(list.map { it.value }.toMutableList()).collect { swapInfo ->
