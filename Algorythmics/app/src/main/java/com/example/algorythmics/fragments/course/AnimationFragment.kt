@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
 import com.example.algorythmics.presentation.InsertionSortViewModel
+import com.example.algorythmics.presentation.QuickSortViewModel
 import com.example.algorythmics.presentation.SelectionSortViewModel
 import com.example.algorythmics.presentation.ShellSortViewModel
 import com.example.algorythmics.presentation.SortViewModel
@@ -23,6 +24,7 @@ class AnimationFragment : Fragment() {
     private val insertionSortViewModel: InsertionSortViewModel by activityViewModels()
     private val selectionSortViewModel: SelectionSortViewModel by activityViewModels()
     private val shellSortViewModel: ShellSortViewModel by activityViewModels()
+    private val quickSortViewModel: QuickSortViewModel by activityViewModels()
     private lateinit var btnSortList: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var sortedListAdapter: SortedListAdapter
@@ -62,6 +64,7 @@ class AnimationFragment : Fragment() {
                 "653d32ffce1b18cbd8bd14b2" -> insertionSortViewModel.startInsertionSorting()
                 "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.startSelectionSorting()
                 "653d3c49ce1b18cbd8bd14b7" -> shellSortViewModel.startShellSorting()
+                "653d3aa2ce1b18cbd8bd14b5" -> quickSortViewModel.startQuickSorting()
             }
         }
 
@@ -79,6 +82,10 @@ class AnimationFragment : Fragment() {
         })
 
         shellSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
+            sortedListAdapter.submitList(it)
+        })
+
+        quickSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
             sortedListAdapter.submitList(it)
         })
     }

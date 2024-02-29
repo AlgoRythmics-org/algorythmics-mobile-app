@@ -1,8 +1,6 @@
 package com.example.algorythmics.retrofit.models
 
 data class QuickSortInfo(
-    val pivotIndex: Int,
-    val isPivot: Boolean,
-    val leftIndex: Int,
-    val rightIndex: Int
+    val partitionIndex: Int, // Az aktuális partícióindex
+    val list: List<Int> // A lista állapota a partíciózás után
 )

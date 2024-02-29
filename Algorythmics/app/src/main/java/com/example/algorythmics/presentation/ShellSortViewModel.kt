@@ -9,7 +9,6 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class ShellSortViewModel (private val shellSortUseCase: ShellSortUseCase = ShellSortUseCase()) : ViewModel() {
-
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
@@ -35,10 +34,29 @@ class ShellSortViewModel (private val shellSortUseCase: ShellSortUseCase = Shell
                 if (currentItemIndex >= 0 && currentItemIndex < _listToSort.value!!.size) {
                     val newList = _listToSort.value!!.toMutableList()
 
-                    if (swapInfo.itemToSwap != -1) {
-                        val firstItem = newList[currentItemIndex].copy(isCurrentlyCompared = false)
-                        newList[currentItemIndex] = newList[swapInfo.itemToSwap].copy(isCurrentlyCompared = false)
-                        newList[swapInfo.itemToSwap] = firstItem
+                    // Az összehasonlítás alatt álló elemek pirossá tétele
+                    val itemToCompareIndex = swapInfo.itemToSwap
+                    if (itemToCompareIndex != -1) {
+                        // Elemek cseréje
+                        val temp = newList[currentItemIndex]
+                        newList[currentItemIndex] = newList[itemToCompareIndex]
+                        newList[itemToCompareIndex] = temp
+
+                        // Ha nincs több cserélnivaló, akkor állítjuk pirosra az összes elemet
+                        if (itemToCompareIndex == -1) {
+                            newList.forEachIndexed { index, listUiItem ->
+                                newList[index] = listUiItem.copy(isCurrentlyCompared = true)
+                            }
+                        } else {
+                            // Ha még vannak cserék hátra, csak az éppen cserélt elemeket állítjuk pirosra
+                            newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = true)
+                            newList[itemToCompareIndex] = newList[itemToCompareIndex].copy(isCurrentlyCompared = true)
+                        }
+                    } else {
+                        // Az összehasonlítás befejeződött, minden elemet visszaállítjuk
+                        newList.forEachIndexed { index, listUiItem ->
+                            newList[index] = listUiItem.copy(isCurrentlyCompared = false)
+                        }
                     }
 
                     _listToSort.value = newList
@@ -46,4 +64,6 @@ class ShellSortViewModel (private val shellSortUseCase: ShellSortUseCase = Shell
             }
         }
     }
+
+
 }
