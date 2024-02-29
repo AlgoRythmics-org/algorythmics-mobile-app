@@ -15,7 +15,7 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
 
     init {
         val list = mutableListOf<ListUiItem>()
-        for (i in 0 until 9) {
+        for (i in 0 until 10) {
             list.add(
                 ListUiItem(
                     id = i,

@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.algorythmics.fragments.course.SelectionSortListAdapter
+import com.example.algorythmics.retrofit.models.SelectionSortInfo
 import com.example.algorythmics.use_case.SelectionSortUseCase
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -30,6 +32,9 @@ class SelectionSortViewModel
 
     fun startSelectionSorting() {
         viewModelScope.launch {
+            val initialList = _listToSort.value!!.map { it.copy(isCurrentlyCompared = false) }
+            _listToSort.value = initialList
+
             selectionSortUseCase(_listToSort.value!!.map { it.value }.toMutableList()).collect { swapInfo ->
                 val currentItemIndex = swapInfo.currentItem
 
@@ -37,16 +42,23 @@ class SelectionSortViewModel
                     val newList = _listToSort.value!!.toMutableList()
 
                     if (swapInfo.shouldSwap) {
-                        val firstItem = newList[currentItemIndex].copy(isCurrentlyCompared = false)
-                        newList[currentItemIndex] = newList[swapInfo.itemToSwap].copy(isCurrentlyCompared = false)
-                        newList[swapInfo.itemToSwap] = firstItem
-                    }
+                        // Elemek cseréje
+                        val temp = newList[currentItemIndex]
+                        newList[currentItemIndex] = newList[swapInfo.itemToSwap]
+                        newList[swapInfo.itemToSwap] = temp
 
-                    newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = false)
-                    newList[swapInfo.itemToSwap] = newList[swapInfo.itemToSwap].copy(isCurrentlyCompared = false)
-                    _listToSort.value = newList
+                        // Csak az éppen cserélt elemet állítjuk pirosra
+                        newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = true)
+
+                        // Lista frissítése
+                        _listToSort.value = newList
+                    }
                 }
             }
+
+            // Sortálás végén az összes elem pirosra állítása
+            val finalList = _listToSort.value!!.map { it.copy(isCurrentlyCompared = true) }
+            _listToSort.value = finalList
         }
     }
 }

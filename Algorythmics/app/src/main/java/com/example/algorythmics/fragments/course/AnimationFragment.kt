@@ -26,6 +26,7 @@ class AnimationFragment : Fragment() {
     private lateinit var btnSortList: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var sortedListAdapter: SortedListAdapter
+    private lateinit var selectionSortListAdapter: SelectionSortListAdapter
     private var algorithmId: String? = null
 
     override fun onCreateView(
@@ -46,9 +47,11 @@ class AnimationFragment : Fragment() {
         recyclerView = view.findViewById(R.id.rv_container)
 
         sortedListAdapter = SortedListAdapter()
+        selectionSortListAdapter = SelectionSortListAdapter()
         recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = sortedListAdapter
+            //adapter = sortedListAdapter
+            adapter = if (algorithmId == "653d35f6ce1b18cbd8bd14b3") selectionSortListAdapter else sortedListAdapter
         }
 
         // Gomb eseménykezelője
@@ -72,7 +75,7 @@ class AnimationFragment : Fragment() {
         })
 
         selectionSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
-            sortedListAdapter.submitList(it)
+            selectionSortListAdapter.submitList(it)
         })
 
         shellSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
