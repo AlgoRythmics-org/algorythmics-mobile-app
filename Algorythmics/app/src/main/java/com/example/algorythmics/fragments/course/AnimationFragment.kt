@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
 import com.example.algorythmics.presentation.InsertionSortViewModel
+import com.example.algorythmics.presentation.LinearSearchViewModel
 import com.example.algorythmics.presentation.QuickSortViewModel
 import com.example.algorythmics.presentation.SelectionSortViewModel
 import com.example.algorythmics.presentation.ShellSortViewModel
@@ -25,11 +28,13 @@ class AnimationFragment : Fragment() {
     private val selectionSortViewModel: SelectionSortViewModel by activityViewModels()
     private val shellSortViewModel: ShellSortViewModel by activityViewModels()
     private val quickSortViewModel: QuickSortViewModel by activityViewModels()
+    private val linearSearchViewModel: LinearSearchViewModel by activityViewModels()
     private lateinit var btnSortList: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var sortedListAdapter: SortedListAdapter
     private lateinit var selectionSortListAdapter: SelectionSortListAdapter
-    private var algorithmId: String? = null
+    private lateinit var algorithmId: String
+    private lateinit var etSearchNumber: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,10 +48,11 @@ class AnimationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Az algoritmus azonosítójának beállítása az előző fragmentből kapott adat alapján
-        algorithmId = arguments?.getString("algorithmId")
+        algorithmId = arguments?.getString("algorithmId") ?: ""
 
         btnSortList = view.findViewById(R.id.btn_sort_list)
         recyclerView = view.findViewById(R.id.rv_container)
+        etSearchNumber = view.findViewById(R.id.et_search_number)
 
         sortedListAdapter = SortedListAdapter()
         selectionSortListAdapter = SelectionSortListAdapter()
@@ -65,6 +71,10 @@ class AnimationFragment : Fragment() {
                 "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.startSelectionSorting()
                 "653d3c49ce1b18cbd8bd14b7" -> shellSortViewModel.startShellSorting()
                 "653d3aa2ce1b18cbd8bd14b5" -> quickSortViewModel.startQuickSorting()
+                "653d3cf5ce1b18cbd8bd14b8" -> {
+                    val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return@setOnClickListener
+                    linearSearchViewModel.startLinearSearch(searchNumber)
+                }
             }
         }
 
@@ -88,5 +98,28 @@ class AnimationFragment : Fragment() {
         quickSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
             sortedListAdapter.submitList(it)
         })
+
+        linearSearchViewModel.listToSearch.observe(viewLifecycleOwner, Observer {
+            sortedListAdapter.submitList(it)
+        })
+
+        linearSearchViewModel.searchResult.observe(viewLifecycleOwner, Observer { result ->
+            // Ha van keresési eredmény, frissítjük a listát és jelöljük a találatot
+            result?.let {
+                val newList = sortedListAdapter.currentList.mapIndexed { index, item ->
+                    item.copy(isCurrentlyCompared = index == result)
+                }
+                sortedListAdapter.submitList(newList)
+                val message = "A keresett szám megtalálva a(z) ${result + 1}. helyen."
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            }
+        })
+
+        // Ha az algoritmus azonosítója "653d3cf5ce1b18cbd8bd14b8", akkor mutassuk meg az EditText-et
+        if (algorithmId == "653d3cf5ce1b18cbd8bd14b8") {
+            etSearchNumber.visibility = View.VISIBLE
+        } else {
+            etSearchNumber.visibility = View.GONE
+        }
     }
 }

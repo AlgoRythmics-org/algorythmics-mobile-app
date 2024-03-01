@@ -14,6 +14,14 @@
         android:layout_gravity="center"
         android:gravity="center" />
 
+    <EditText
+        android:id="@+id/et_search_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter number to search"
+        android:inputType="number"/>
+
+
     <Button
         android:id="@+id/btn_sort_list"
         android:layout_width="wrap_content"
