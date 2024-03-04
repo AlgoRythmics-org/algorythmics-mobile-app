@@ -8,5 +8,6 @@ data class ListUiItem(
     var isCurrentlyCompared: Boolean = false,
     var isInitialColorNeeded: Boolean = true,
     var isSorted: Boolean = false,
+    var isFound: Boolean = false
 
 )

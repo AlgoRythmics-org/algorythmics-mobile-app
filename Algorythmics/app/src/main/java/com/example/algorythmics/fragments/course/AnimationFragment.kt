@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
+import com.example.algorythmics.presentation.BinarySearchViewModel
 import com.example.algorythmics.presentation.InsertionSortViewModel
 import com.example.algorythmics.presentation.LinearSearchViewModel
 import com.example.algorythmics.presentation.QuickSortViewModel
@@ -29,6 +30,7 @@ class AnimationFragment : Fragment() {
     private val shellSortViewModel: ShellSortViewModel by activityViewModels()
     private val quickSortViewModel: QuickSortViewModel by activityViewModels()
     private val linearSearchViewModel: LinearSearchViewModel by activityViewModels()
+    private val binarySearchViewModel: BinarySearchViewModel by activityViewModels()
     private lateinit var btnSortList: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var sortedListAdapter: SortedListAdapter
@@ -75,6 +77,10 @@ class AnimationFragment : Fragment() {
                     val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return@setOnClickListener
                     linearSearchViewModel.startLinearSearch(searchNumber)
                 }
+                "653d3dfece1b18cbd8bd14b9" -> {
+                    val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return@setOnClickListener
+                    binarySearchViewModel.startBinarySearch(searchNumber)
+                }
             }
         }
 
@@ -103,6 +109,16 @@ class AnimationFragment : Fragment() {
             sortedListAdapter.submitList(it)
         })
 
+        binarySearchViewModel.searchResult.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { index ->
+                val newList = sortedListAdapter.currentList.mapIndexed { listIndex, item ->
+                    item.copy(isCurrentlyCompared = listIndex == index)
+                }
+                sortedListAdapter.submitList(newList)
+            }
+        })
+
+
         linearSearchViewModel.searchResult.observe(viewLifecycleOwner, Observer { result ->
             // Ha van keresési eredmény, frissítjük a listát és jelöljük a találatot
             result?.let {
@@ -115,8 +131,21 @@ class AnimationFragment : Fragment() {
             }
         })
 
+        binarySearchViewModel.searchResult.observe(viewLifecycleOwner, Observer { result ->
+            // Ha van keresési eredmény, frissítjük a listát és jelöljük a találatot
+            result?.let {
+                val newList = sortedListAdapter.currentList.mapIndexed { index, item ->
+                    item.copy(isCurrentlyCompared = index == result)
+                }
+                sortedListAdapter.submitList(newList)
+                val message = "A keresett szám megtalálva a(z) ${result + 1}. helyen."
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            }
+        })
+
+
         // Ha az algoritmus azonosítója "653d3cf5ce1b18cbd8bd14b8", akkor mutassuk meg az EditText-et
-        if (algorithmId == "653d3cf5ce1b18cbd8bd14b8") {
+        if (algorithmId == "653d3cf5ce1b18cbd8bd14b8" || algorithmId == "653d3dfece1b18cbd8bd14b9") {
             etSearchNumber.visibility = View.VISIBLE
         } else {
             etSearchNumber.visibility = View.GONE
