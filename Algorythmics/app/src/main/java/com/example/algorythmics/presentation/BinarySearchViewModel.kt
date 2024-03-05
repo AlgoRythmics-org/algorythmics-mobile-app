@@ -11,40 +11,42 @@ import kotlin.random.Random
 
 class BinarySearchViewModel : ViewModel() {
 
-    private val _sortedListToSearch = MutableLiveData<MutableList<ListUiItem>>()
-    val sortedListToSearch: LiveData<MutableList<ListUiItem>> get() = _sortedListToSearch
+    private val _listToSearch = MutableLiveData<MutableList<Int>>()
+    //val listToSearch: LiveData<MutableList<Int>> get() = _listToSearch
 
     private val _searchResult = MutableLiveData<Int?>()
     val searchResult: LiveData<Int?> get() = _searchResult
 
-    init {
-        val random = Random(System.currentTimeMillis()) // Inicializáljuk a random generátort az aktuális idő alapján
-        val randomList = MutableList(10) { ListUiItem(id = it, isCurrentlyCompared = false, value = random.nextInt(100)) }
-        val sortedList = randomList.sortedBy { it.value }.toMutableList() // Rendezzük a listát növekvő sorrendben
-        _sortedListToSearch.value = sortedList
-    }
+    private val binarySearchUseCase = BinarySearchUseCase()
 
     fun startBinarySearch(searchNumber: Int) {
         viewModelScope.launch {
-            _searchResult.value = null // Alapértelmezett eredmény beállítása
-            val list = _sortedListToSearch.value ?: return@launch
-            var left = 0
-            var right = list.size - 1
+            _searchResult.value = null
+            val list = _listToSearch.value ?: return@launch
 
-            while (left <= right) {
-                val mid = left + (right - left) / 2
-                val midValue = list[mid].value
-                if (midValue == searchNumber) {
-                    _searchResult.value = mid // Az elem megtalálva
-                    return@launch
-                }
-                if (midValue < searchNumber) {
-                    left = mid + 1 // Ha a középső elem kisebb, mint a keresett szám, a jobb oldalra kell mennünk
-                } else {
-                    right = mid - 1 // Különben a bal oldalra kell mennünk
-                }
+            binarySearchUseCase(list, searchNumber).collect { result ->
+                _searchResult.value = result
             }
         }
+    }
+
+    init {
+        val list = mutableListOf<Int>()
+        for (i in 0 until 10) {
+            list.add(i * 2)
+        }
+        list.shuffle() // Megkeverjük a számokat
+        setListToSearch(list)
+    }
+
+    fun setListToSearch(list: MutableList<Int>) {
+        _listToSearch.value = list
+    }
+
+    fun sortList() {
+        val list = _listToSearch.value ?: return
+        list.sort() // Növekvő sorrendbe rendezzük
+        setListToSearch(list)
     }
 
 }

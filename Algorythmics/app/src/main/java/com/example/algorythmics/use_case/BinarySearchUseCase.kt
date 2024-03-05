@@ -5,22 +5,29 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class BinarySearchUseCase {
-    operator fun invoke(list: List<ListUiItem>, searchNumber: Int): Int? {
-        var left = 0
-        var right = list.size - 1
+    operator fun invoke(list: MutableList<Int>, searchNumber: Int): Flow<Int?> = flow {
+        var low = 0
+        var high = list.size - 1
+        var foundIndex: Int? = null
 
-        while (left <= right) {
-            val mid = (left + right) / 2
-            val midValue = list[mid].value
-            if (midValue == searchNumber) {
-                return mid // Az elem megtalálva
+        while (low <= high) {
+            val mid = (low + high) / 2
+            val guess = list[mid]
+
+            if (guess == searchNumber) {
+                foundIndex = mid
+                break
             }
-            if (midValue < searchNumber) {
-                left = mid + 1 // Ha a középső elem kisebb, mint a keresett szám, a jobb oldalra kell mennünk
+            if (guess < searchNumber) {
+                low = mid + 1
             } else {
-                right = mid - 1 // Különben a bal oldalra kell mennünk
+                high = mid - 1
             }
+            // Emit progress if needed
+            emit(foundIndex)
         }
-        return null // Elem nem található a listában
+
+        emit(foundIndex)
     }
+
 }

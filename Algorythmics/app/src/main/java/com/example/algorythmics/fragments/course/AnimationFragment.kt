@@ -16,6 +16,7 @@ import com.example.algorythmics.R
 import com.example.algorythmics.presentation.BinarySearchViewModel
 import com.example.algorythmics.presentation.InsertionSortViewModel
 import com.example.algorythmics.presentation.LinearSearchViewModel
+import com.example.algorythmics.presentation.ListUiItem
 import com.example.algorythmics.presentation.QuickSortViewModel
 import com.example.algorythmics.presentation.SelectionSortViewModel
 import com.example.algorythmics.presentation.ShellSortViewModel
@@ -78,8 +79,8 @@ class AnimationFragment : Fragment() {
                     linearSearchViewModel.startLinearSearch(searchNumber)
                 }
                 "653d3dfece1b18cbd8bd14b9" -> {
-                    val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return@setOnClickListener
-                    binarySearchViewModel.startBinarySearch(searchNumber)
+                    val searchNumber2 = etSearchNumber.text.toString().toIntOrNull() ?: return@setOnClickListener
+                    binarySearchViewModel.startBinarySearch(searchNumber2)
                 }
             }
         }
@@ -111,12 +112,19 @@ class AnimationFragment : Fragment() {
 
         binarySearchViewModel.searchResult.observe(viewLifecycleOwner, Observer { result ->
             result?.let { index ->
-                val newList = sortedListAdapter.currentList.mapIndexed { listIndex, item ->
-                    item.copy(isCurrentlyCompared = listIndex == index)
+                val newList = mutableListOf<ListUiItem>()
+                sortedListAdapter.currentList.forEachIndexed { listIndex, item ->
+                    newList.add(
+                        item.copy(
+                            isCurrentlyCompared = listIndex == index,
+                            isFound = listIndex == index
+                        )
+                    )
                 }
                 sortedListAdapter.submitList(newList)
             }
         })
+
 
 
         linearSearchViewModel.searchResult.observe(viewLifecycleOwner, Observer { result ->
