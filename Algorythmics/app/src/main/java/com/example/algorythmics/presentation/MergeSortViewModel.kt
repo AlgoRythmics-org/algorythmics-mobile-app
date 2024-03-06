@@ -1,79 +1,53 @@
 package com.example.algorythmics.presentation
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.graphics.Color
+
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+
 import com.example.algorythmics.use_case.MergeSortUseCase
-import kotlinx.coroutines.Job
+
 import kotlinx.coroutines.launch
-import java.util.UUID
+import kotlin.random.Random
 
-class MergeSortViewModel
-    (private val mergeSortUseCase: MergeSortUseCase = MergeSortUseCase()) : ViewModel() {
 
-    var listToSort = mutableListOf<Int>()
+class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeSortUseCase()) : ViewModel() {
 
-    var sortInfoUiItemList = mutableStateListOf<MergeSortUiItem>()
+    private val _listToSort = MutableLiveData<List<ListUiItem>>()
+    val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
     init {
-        for(i in 0 until 8){
-            listToSort.add(
-                (10..99).random()
+        val list = mutableListOf<ListUiItem>()
+        for (i in 0 until 10) {
+            list.add(
+                ListUiItem(
+                    id = i,
+                    isCurrentlyCompared = false,
+                    value = Random.nextInt(150)
+                )
             )
         }
+        _listToSort.value = list
     }
 
-    fun startSorting(){
-        sortInfoUiItemList.clear()
-        subscribeToSortChanges()
+    fun startMergeSorting() {
         viewModelScope.launch {
-            mergeSortUseCase(listToSort, 0)
-        }
-    }
+            _listToSort.value?.let { list ->
+                mergeSortUseCase(list.map { it.value }.toMutableList()).collect { swapInfo ->
+                    val currentItemIndex = swapInfo.currentItem
+                    val newList = _listToSort.value!!.toMutableList()
 
-    private var job: Job? = null
-    private fun subscribeToSortChanges(){
-        job?.cancel()
-        job = viewModelScope.launch {
-            mergeSortUseCase.sortFlow.collect { sortInfo ->
-                val depthAlreadyExistListIndex = sortInfoUiItemList.indexOfFirst {
-                    it.depth == sortInfo.depth && it.sortState == sortInfo.sortState
+                    if (currentItemIndex >= newList.size || currentItemIndex + 1 >= newList.size) return@collect
+
+                    if (swapInfo.shouldSwap) {
+                        val temp = newList[currentItemIndex]
+                        newList[currentItemIndex] = newList[currentItemIndex + 1]
+                        newList[currentItemIndex + 1] = temp
+                    }
+
+                    _listToSort.value = newList
                 }
-
-                if(depthAlreadyExistListIndex == -1){
-                    sortInfoUiItemList.add(
-                        MergeSortUiItem(
-                            id = UUID.randomUUID().toString(),
-                            depth = sortInfo.depth,
-                            sortState = sortInfo.sortState,
-                            sortParts = listOf(sortInfo.sortParts),
-                            color = Color(
-                                (0..255).random(),
-                                (0..200).random(),
-                                (0..200).random(),
-                                255)
-                        )
-                    )
-                }else{
-                    val currentPartList = sortInfoUiItemList[depthAlreadyExistListIndex].sortParts.toMutableList()
-                    currentPartList.add(sortInfo.sortParts)
-                    sortInfoUiItemList.set(
-                        depthAlreadyExistListIndex,
-                        sortInfoUiItemList[depthAlreadyExistListIndex].copy(sortParts = currentPartList)
-                    )
-                }
-
-                sortInfoUiItemList.sortedWith(
-                    compareBy(
-                        {
-                            it.sortState
-                        },
-                        {
-                            it.depth
-                        }
-                    )
-                )
             }
         }
     }

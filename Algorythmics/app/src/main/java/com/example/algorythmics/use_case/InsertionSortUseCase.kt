@@ -1,6 +1,5 @@
 package com.example.algorythmics.use_case
 
-import com.example.algorythmics.presentation.ListUiItem
 import com.example.algorythmics.retrofit.models.SortInfo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

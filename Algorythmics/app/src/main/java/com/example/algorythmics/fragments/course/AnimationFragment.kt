@@ -17,10 +17,12 @@ import com.example.algorythmics.presentation.BinarySearchViewModel
 import com.example.algorythmics.presentation.InsertionSortViewModel
 import com.example.algorythmics.presentation.LinearSearchViewModel
 import com.example.algorythmics.presentation.ListUiItem
+import com.example.algorythmics.presentation.MergeSortViewModel
 import com.example.algorythmics.presentation.QuickSortViewModel
 import com.example.algorythmics.presentation.SelectionSortViewModel
 import com.example.algorythmics.presentation.ShellSortViewModel
 import com.example.algorythmics.presentation.SortViewModel
+import java.util.UUID
 
 
 class AnimationFragment : Fragment() {
@@ -32,6 +34,7 @@ class AnimationFragment : Fragment() {
     private val quickSortViewModel: QuickSortViewModel by activityViewModels()
     private val linearSearchViewModel: LinearSearchViewModel by activityViewModels()
     private val binarySearchViewModel: BinarySearchViewModel by activityViewModels()
+    private val mergeSortViewModel: MergeSortViewModel by activityViewModels()
     private lateinit var btnSortList: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var sortedListAdapter: SortedListAdapter
@@ -61,7 +64,6 @@ class AnimationFragment : Fragment() {
         selectionSortListAdapter = SelectionSortListAdapter()
         recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
-            //adapter = sortedListAdapter
             adapter = if (algorithmId == "653d35f6ce1b18cbd8bd14b3") selectionSortListAdapter else sortedListAdapter
         }
 
@@ -74,6 +76,7 @@ class AnimationFragment : Fragment() {
                 "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.startSelectionSorting()
                 "653d3c49ce1b18cbd8bd14b7" -> shellSortViewModel.startShellSorting()
                 "653d3aa2ce1b18cbd8bd14b5" -> quickSortViewModel.startQuickSorting()
+                "653d36ecce1b18cbd8bd14b4" -> mergeSortViewModel.startMergeSorting()
                 "653d3cf5ce1b18cbd8bd14b8" -> {
                     val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return@setOnClickListener
                     linearSearchViewModel.startLinearSearch(searchNumber)
@@ -106,26 +109,17 @@ class AnimationFragment : Fragment() {
             sortedListAdapter.submitList(it)
         })
 
+        mergeSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
+            sortedListAdapter.submitList(it)
+        })
+
         linearSearchViewModel.listToSearch.observe(viewLifecycleOwner, Observer {
             sortedListAdapter.submitList(it)
         })
 
-        binarySearchViewModel.searchResult.observe(viewLifecycleOwner, Observer { result ->
-            result?.let { index ->
-                val newList = mutableListOf<ListUiItem>()
-                sortedListAdapter.currentList.forEachIndexed { listIndex, item ->
-                    newList.add(
-                        item.copy(
-                            isCurrentlyCompared = listIndex == index,
-                            isFound = listIndex == index
-                        )
-                    )
-                }
-                sortedListAdapter.submitList(newList)
-            }
+        binarySearchViewModel.listToSearch.observe(viewLifecycleOwner, Observer {
+            sortedListAdapter.submitList(it)
         })
-
-
 
         linearSearchViewModel.searchResult.observe(viewLifecycleOwner, Observer { result ->
             // Ha van keresési eredmény, frissítjük a listát és jelöljük a találatot
@@ -151,7 +145,6 @@ class AnimationFragment : Fragment() {
             }
         })
 
-
         // Ha az algoritmus azonosítója "653d3cf5ce1b18cbd8bd14b8", akkor mutassuk meg az EditText-et
         if (algorithmId == "653d3cf5ce1b18cbd8bd14b8" || algorithmId == "653d3dfece1b18cbd8bd14b9") {
             etSearchNumber.visibility = View.VISIBLE
@@ -160,3 +153,4 @@ class AnimationFragment : Fragment() {
         }
     }
 }
+
