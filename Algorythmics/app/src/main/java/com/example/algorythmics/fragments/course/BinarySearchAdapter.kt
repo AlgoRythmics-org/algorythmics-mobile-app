@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
 import com.example.algorythmics.presentation.ListUiItem
 
-class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(DiffCallback) {
+class BinarySearchAdapter : ListAdapter<ListUiItem, BinarySearchAdapter.ViewHolder>(DiffCallback) {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView: TextView = itemView.findViewById(R.id.text_view)

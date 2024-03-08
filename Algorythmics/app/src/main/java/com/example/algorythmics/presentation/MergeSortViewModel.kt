@@ -17,6 +17,9 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
+    private val _sortedList = MutableLiveData<List<ListUiItem>>()
+    val sortedList: LiveData<List<ListUiItem>> get() = _sortedList
+
     init {
         val list = mutableListOf<ListUiItem>()
         for (i in 0 until 10) {
@@ -28,28 +31,18 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
                 )
             )
         }
-        _listToSort.value = list
+        _listToSort.value = list.sortedBy { it.value }
     }
 
     fun startMergeSorting() {
         viewModelScope.launch {
-            _listToSort.value?.let { list ->
-                mergeSortUseCase(list.map { it.value }.toMutableList()).collect { swapInfo ->
-                    val currentItemIndex = swapInfo.currentItem
-                    val newList = _listToSort.value!!.toMutableList()
-
-                    if (currentItemIndex >= newList.size || currentItemIndex + 1 >= newList.size) return@collect
-
-                    if (swapInfo.shouldSwap) {
-                        val temp = newList[currentItemIndex]
-                        newList[currentItemIndex] = newList[currentItemIndex + 1]
-                        newList[currentItemIndex + 1] = temp
+            _listToSort.value?.map { it.value }?.toMutableList()?.let { list ->
+                mergeSortUseCase(list).collect { sortedList ->
+                    _sortedList.value = sortedList.mapIndexed { index, value ->
+                        _listToSort.value!![index].copy(value = value)
                     }
-
-                    _listToSort.value = newList
                 }
             }
         }
     }
-
 }

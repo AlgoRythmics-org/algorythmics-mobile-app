@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
 import com.example.algorythmics.presentation.ListUiItem
 
-class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(DiffCallback) {
+class MergeSortAdapter : ListAdapter<ListUiItem, MergeSortAdapter.ViewHolder>(DiffCallback) {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView: TextView = itemView.findViewById(R.id.text_view)
@@ -41,10 +41,6 @@ class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
-    }
-
-    fun updateList(newList: List<ListUiItem>) {
-        submitList(newList)
     }
 
     companion object {

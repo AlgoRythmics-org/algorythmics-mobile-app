@@ -12,16 +12,17 @@ class MergeSortUseCase {
         list: MutableList<Int>,
         start: Int = 0,
         end: Int = list.size - 1
-    ): Flow<SortInfo> = flow {
+    ): Flow<List<Int>> = flow {
         if (start < end) {
             val mid = (start + end) / 2
             invoke(list, start, mid).collect { emit(it) }
             invoke(list, mid + 1, end).collect { emit(it) }
             merge(list, start, mid, end)
+            emit(list.subList(start, end + 1))
         }
     }
 
-    private suspend fun FlowCollector<SortInfo>.merge(
+    private suspend fun FlowCollector<List<Int>>.merge(
         list: MutableList<Int>,
         start: Int,
         mid: Int,
@@ -51,14 +52,14 @@ class MergeSortUseCase {
                 list[k] = rightArray[j]
                 j++
             }
-            emit(SortInfo(currentItem = k, shouldSwap = false, hadNoEffect = false))
+            emit(list.subList(start, end + 1))
             delay(500)
             k++
         }
 
         while (i < leftSize) {
             list[k] = leftArray[i]
-            emit(SortInfo(currentItem = k, shouldSwap = false, hadNoEffect = false))
+            emit(list.subList(start, end + 1))
             delay(500)
             i++
             k++
@@ -66,7 +67,7 @@ class MergeSortUseCase {
 
         while (j < rightSize) {
             list[k] = rightArray[j]
-            emit(SortInfo(currentItem = k, shouldSwap = false, hadNoEffect = false))
+            emit(list.subList(start, end + 1))
             delay(500)
             j++
             k++
