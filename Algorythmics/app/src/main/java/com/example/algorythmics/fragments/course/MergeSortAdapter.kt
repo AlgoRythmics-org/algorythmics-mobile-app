@@ -32,15 +32,22 @@ class MergeSortAdapter : ListAdapter<ListUiItem, MergeSortAdapter.ViewHolder>(Di
         val initialColor = Color.parseColor("#1BDBBE")
         val comparisonColor = Color.parseColor("#FF5733")
         val foundColor = Color.parseColor("#FFA500")
+        val swappedColor = Color.parseColor("#FFFF00") // Új szín a csere jelzésére
 
-        // Az aktuális elem háttérszíne az összehasonlítás vagy találat alapján
+        // Az aktuális elem háttérszíne az összehasonlítás, találat vagy csere alapján
         val backgroundColor = when {
             item.isCurrentlyCompared -> comparisonColor
-            item.isFound -> foundColor // Ha már megtaláltuk az elemet
+            item.isFound -> foundColor
+            item.needsColorUpdate -> swappedColor // Ha színezést igényel
             else -> initialColor
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
+    }
+
+
+    fun updateList(newList: List<ListUiItem>) {
+        submitList(newList)
     }
 
     companion object {

@@ -1,15 +1,13 @@
 package com.example.algorythmics.presentation
 
-
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-
 import com.example.algorythmics.use_case.MergeSortUseCase
-
 import kotlinx.coroutines.launch
-import kotlin.random.Random
+
+
 
 
 class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeSortUseCase()) : ViewModel() {
@@ -17,31 +15,40 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
-    private val _sortedList = MutableLiveData<List<ListUiItem>>()
-    val sortedList: LiveData<List<ListUiItem>> get() = _sortedList
-
     init {
+        initializeList()
+    }
+
+    private fun initializeList() {
         val list = mutableListOf<ListUiItem>()
-        for (i in 0 until 10) {
+        for (i in 0 until 9) {
             list.add(
                 ListUiItem(
                     id = i,
                     isCurrentlyCompared = false,
-                    value = Random.nextInt(150)
+                    value = (1..150).random(),
+                    needsColorUpdate = false // Alapértelmezetten nincs színezési igény
                 )
             )
         }
-        _listToSort.value = list.sortedBy { it.value }
+        _listToSort.value = list
     }
 
     fun startMergeSorting() {
         viewModelScope.launch {
-            _listToSort.value?.map { it.value }?.toMutableList()?.let { list ->
-                mergeSortUseCase(list).collect { sortedList ->
-                    _sortedList.value = sortedList.mapIndexed { index, value ->
-                        _listToSort.value!![index].copy(value = value)
-                    }
+            val originalList = _listToSort.value ?: return@launch
+            val sortedList = mergeSortUseCase.mergeSort(originalList.map { it.value }.toMutableList(), 0, originalList.size - 1)
+            sortedList.collect { sortedValues ->
+                val newList = sortedValues.mapIndexed { index, value ->
+                    val oldItem = _listToSort.value?.getOrNull(index)
+                    ListUiItem(
+                        id = index,
+                        isCurrentlyCompared = oldItem?.isCurrentlyCompared ?: false,
+                        value = value,
+                        needsColorUpdate = oldItem?.isCurrentlyCompared == true // A színezési igényt a hasonlítás alapján állítjuk be
+                    )
                 }
+                _listToSort.value = newList
             }
         }
     }

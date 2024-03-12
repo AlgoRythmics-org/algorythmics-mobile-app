@@ -8,50 +8,55 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 
+
 class HeapSortUseCase {
-    suspend operator fun invoke(list: MutableList<Int>): Flow<SortInfo> = flow {
-        buildHeap(list)
+    suspend fun heapSort(list: MutableList<Int>): Flow<List<SortInfo>> = flow {
+        val sortInfoList = mutableListOf<SortInfo>()
+        buildMaxHeap(list, sortInfoList)
 
+        for (i in list.size - 1 downTo 1) {
+            list.swap(0, i)
+            sortInfoList.add(SortInfo(list[i], shouldSwap = true, hadNoEffect = false))
+            emit(sortInfoList.toList()) // Jelenítsük meg a rendezés aktuális állapotát
+            maxHeapify(list, 0, i, sortInfoList)
+        }
+
+        sortInfoList.add(SortInfo(list[0], shouldSwap = false, hadNoEffect = false))
+        emit(sortInfoList.toList()) // Jelenítsük meg a rendezés végleges állapotát
+    }
+
+    private suspend fun buildMaxHeap(list: MutableList<Int>, sortInfoList: MutableList<SortInfo>) {
         val n = list.size
-
-        for (i in n - 1 downTo 0) {
-            swap(list, i, 0)
-            emit(SortInfo(currentItem = i, shouldSwap = true, hadNoEffect = false))
-            delay(500)
-            heapify(list, i, 0)
-        }
-    }
-
-    private fun buildHeap(arr: MutableList<Int>) {
-        val n = arr.size
-
         for (i in n / 2 - 1 downTo 0) {
-            heapify(arr, n, i)
+            maxHeapify(list, i, n, sortInfoList)
         }
     }
 
-    private fun heapify(arr: MutableList<Int>, n: Int, i: Int) {
+    private suspend fun maxHeapify(list: MutableList<Int>, i: Int, heapSize: Int, sortInfoList: MutableList<SortInfo>) {
         var largest = i
-        val l = 2 * i + 1
-        val r = 2 * i + 2
+        val left = 2 * i + 1
+        val right = 2 * i + 2
 
-        if (l < n && arr[l] > arr[largest]) {
-            largest = l
+        if (left < heapSize && list[left] > list[largest]) {
+            largest = left
         }
 
-        if (r < n && arr[r] > arr[largest]) {
-            largest = r
+        if (right < heapSize && list[right] > list[largest]) {
+            largest = right
         }
 
         if (largest != i) {
-            swap(arr, i, largest)
-            heapify(arr, n, largest)
+            list.swap(i, largest)
+            sortInfoList.add(SortInfo(list[i], shouldSwap = true, hadNoEffect = false))
+            maxHeapify(list, largest, heapSize, sortInfoList)
+        } else {
+            sortInfoList.add(SortInfo(list[i], shouldSwap = false, hadNoEffect = true))
         }
     }
 
-    private fun swap(arr: MutableList<Int>, x: Int, y: Int) {
-        val temp = arr[x]
-        arr[x] = arr[y]
-        arr[y] = temp
+    private suspend fun MutableList<Int>.swap(i: Int, j: Int) {
+        val temp = this[i]
+        this[i] = this[j]
+        this[j] = temp
     }
 }

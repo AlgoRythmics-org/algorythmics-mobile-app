@@ -40,7 +40,7 @@ class AnimationFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var sortedListAdapter: SortedListAdapter
     private lateinit var selectionSortListAdapter: SelectionSortListAdapter
-    //ez
+    private lateinit var mergeSortAdapter: MergeSortAdapter
     private lateinit var binarySearchAdapter: BinarySearchAdapter
     private lateinit var algorithmId: String
     private lateinit var etSearchNumber: EditText
@@ -66,13 +66,14 @@ class AnimationFragment : Fragment() {
 
         sortedListAdapter = SortedListAdapter()
         selectionSortListAdapter = SelectionSortListAdapter()
-        //ez
+        mergeSortAdapter = MergeSortAdapter()
         binarySearchAdapter = BinarySearchAdapter()
         recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = when (algorithmId) {
                 "653d35f6ce1b18cbd8bd14b3" -> selectionSortListAdapter
                 "653d3dfece1b18cbd8bd14b9" -> binarySearchAdapter
+                "653d36ecce1b18cbd8bd14b4" -> mergeSortAdapter
                 else -> sortedListAdapter
             }
 
@@ -122,7 +123,7 @@ class AnimationFragment : Fragment() {
         })
 
         mergeSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
-            sortedListAdapter.submitList(it)
+            mergeSortAdapter.submitList(it)
         })
 
         heapSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {

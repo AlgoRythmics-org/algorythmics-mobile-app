@@ -18,13 +18,17 @@ class HeapSortViewModel(private val heapSortUseCase: HeapSortUseCase = HeapSortU
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
     init {
+        initializeList()
+    }
+
+    private fun initializeList() {
         val list = mutableListOf<ListUiItem>()
-        for (i in 0 until 10) {
+        for (i in 0 until 9) {
             list.add(
                 ListUiItem(
                     id = i,
                     isCurrentlyCompared = false,
-                    value = Random.nextInt(150)
+                    value = (1..150).random() // Random szám generálás 1 és 150 között
                 )
             )
         }
@@ -33,34 +37,18 @@ class HeapSortViewModel(private val heapSortUseCase: HeapSortUseCase = HeapSortU
 
     fun startHeapSorting() {
         viewModelScope.launch {
-            val list = _listToSort.value.orEmpty().toMutableList()
-
-            heapSortUseCase(list.map { it.value }.toMutableList()).collect { sortInfo ->
-                val newList = _listToSort.value!!.toMutableList()
-
-                val currentItemIndex = sortInfo.currentItem
-                val shouldSwap = sortInfo.shouldSwap
-                val hadNoEffect = sortInfo.hadNoEffect
-
-                if (currentItemIndex >= newList.size || currentItemIndex + 1 >= newList.size) return@collect
-
-                // Aktuális elemek pirossá tételére
-                newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = true)
-                newList[currentItemIndex + 1] = newList[currentItemIndex + 1].copy(isCurrentlyCompared = true)
-
-                // Csere esetén
-                if (shouldSwap) {
-                    val firstItem = newList.removeAt(currentItemIndex)
-                    newList.add(currentItemIndex + 1, firstItem)
+            val originalList = _listToSort.value ?: return@launch
+            val sortedList = heapSortUseCase.heapSort(originalList.map { it.value }.toMutableList())
+            sortedList.collect { sortInfoList ->
+                val newList = originalList.mapIndexed { index, item ->
+                    ListUiItem(
+                        id = item.id,
+                        isCurrentlyCompared = false,
+                        value = sortInfoList[index].currentItem,
+                        isFound = sortInfoList[index].shouldSwap,
+                        isInitialColorNeeded = !sortInfoList[index].hadNoEffect
+                    )
                 }
-
-                // Ha nem volt hatása a cserének
-                if (hadNoEffect) {
-                    newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = false)
-                    newList[currentItemIndex + 1] = newList[currentItemIndex + 1].copy(isCurrentlyCompared = false)
-                }
-
-                // Lista frissítése
                 _listToSort.value = newList
             }
         }
