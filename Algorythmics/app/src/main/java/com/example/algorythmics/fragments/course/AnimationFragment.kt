@@ -61,23 +61,22 @@ class AnimationFragment : Fragment() {
 
         btnSortList = view.findViewById(R.id.btn_sort_list)
         recyclerView = view.findViewById(R.id.rv_container)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         etSearchNumber = view.findViewById(R.id.et_search_number)
+
 
         sortedListAdapter = SortedListAdapter()
         selectionSortListAdapter = SelectionSortListAdapter()
         mergeSortAdapter = MergeSortAdapter()
         binarySearchAdapter = BinarySearchAdapter()
-        recyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = when (algorithmId) {
+        recyclerView.adapter = when (algorithmId) {
                 "653d35f6ce1b18cbd8bd14b3" -> selectionSortListAdapter
                 "653d3dfece1b18cbd8bd14b9" -> binarySearchAdapter
                 "653d36ecce1b18cbd8bd14b4" -> mergeSortAdapter
                 else -> sortedListAdapter
             }
 
-        }
+
 
         // Gomb eseménykezelője
         btnSortList.setOnClickListener {
@@ -171,4 +170,3 @@ class AnimationFragment : Fragment() {
         }
     }
 }
-

@@ -22,6 +22,12 @@ class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapte
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView: TextView = itemView.findViewById(R.id.text_view)
+        init {
+            // Állíts be egy kis padding-et az elem aljához
+            val layoutParams = itemView.layoutParams as RecyclerView.LayoutParams
+            layoutParams.bottomMargin = 8 // Válassz megfelelő padding-et vagy margin-t
+            itemView.layoutParams = layoutParams
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectionSortListAdapter.ViewHolder {

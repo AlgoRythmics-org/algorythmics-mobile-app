@@ -42,6 +42,7 @@ android {
 
 dependencies {
 
+    implementation ("androidx.constraintlayout:constraintlayout:2.1.3")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
