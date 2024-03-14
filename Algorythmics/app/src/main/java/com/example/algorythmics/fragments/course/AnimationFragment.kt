@@ -16,6 +16,7 @@ import com.example.algorythmics.R
 import com.example.algorythmics.presentation.BinarySearchViewModel
 import com.example.algorythmics.presentation.HeapSortViewModel
 import com.example.algorythmics.presentation.InsertionSortViewModel
+import com.example.algorythmics.presentation.ItemDecoration
 import com.example.algorythmics.presentation.LinearSearchViewModel
 import com.example.algorythmics.presentation.ListUiItem
 import com.example.algorythmics.presentation.MergeSortViewModel
@@ -56,12 +57,15 @@ class AnimationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val itemDecoration = ItemDecoration()
+
         // Az algoritmus azonosítójának beállítása az előző fragmentből kapott adat alapján
         algorithmId = arguments?.getString("algorithmId") ?: ""
 
         btnSortList = view.findViewById(R.id.btn_sort_list)
         recyclerView = view.findViewById(R.id.rv_container)
         recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        recyclerView.addItemDecoration(itemDecoration)
         etSearchNumber = view.findViewById(R.id.et_search_number)
 
 
