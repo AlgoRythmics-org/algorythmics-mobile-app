@@ -29,6 +29,10 @@ class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(
         holder.textView.text = item.value.toString()
         holder.textView.gravity = Gravity.CENTER
 
+        val height = calculateHeight(item.value)
+        holder.textView.layoutParams.height = height
+
+
         val initialColor = Color.parseColor("#1BDBBE")
         val comparisonColor = Color.parseColor("#FF5733")
         val foundColor = Color.parseColor("#FFA500")
@@ -42,6 +46,19 @@ class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(
 
         holder.itemView.setBackgroundColor(backgroundColor)
     }
+
+    private fun calculateHeight(value: Int): Int {
+        val maxHeight = 60
+        // Csak akkor alkalmazd a számítást, ha az érték meghaladja a maximális magasságot
+        return if (value > maxHeight) {
+            maxHeight
+        } else {
+            // A magasság beállítása valamilyen érték függvényében
+            // Például: 50 pixel + (érték * 10 pixel)
+            20 + (value * 10)
+        }
+    }
+
 
     fun updateList(newList: List<ListUiItem>) {
         submitList(newList)

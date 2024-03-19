@@ -16,9 +16,19 @@ class SortViewModel(private val bubbleSortUseCase: BubbleSortUseCase = BubbleSor
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
+    private val _animationSteps = MutableLiveData<String>()
+    val animationSteps: LiveData<String> get() = _animationSteps
+
+    private val _comparisonMessage = MutableLiveData<String>()
+    val comparisonMessage: LiveData<String> = _comparisonMessage
+
+    fun updateComparisonMessage(message: String) {
+        _comparisonMessage.value = message
+    }
+
     init {
         val list = mutableListOf<ListUiItem>()
-        for (i in 0 until 9) {
+        for (i in 0 until 10) {
             list.add(
                 ListUiItem(
                     id = i,
@@ -42,13 +52,19 @@ class SortViewModel(private val bubbleSortUseCase: BubbleSortUseCase = BubbleSor
                     val firstItem = newList[currentItemIndex].copy(isCurrentlyCompared = false)
                     newList[currentItemIndex] = newList[currentItemIndex + 1].copy(isCurrentlyCompared = false)
                     newList[currentItemIndex + 1] = firstItem
+                    _comparisonMessage.postValue("Elemek felcserélve: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
                 }
                 if (swapInfo.hadNoEffect) {
                     newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = false)
                     newList[currentItemIndex + 1] = newList[currentItemIndex + 1].copy(isCurrentlyCompared = false)
+                    _comparisonMessage.postValue("Elemek nem cseréltek helyet: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
                 }
                 _listToSort.value = newList
+
+                val step = "Step: $currentItemIndex, Comparison: ${swapInfo.currentItem}, Should Swap: ${swapInfo.shouldSwap}, Had No Effect: ${swapInfo.hadNoEffect}"
+                _animationSteps.postValue(step)
             }
         }
     }
+
 }

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -18,7 +19,6 @@ import com.example.algorythmics.presentation.HeapSortViewModel
 import com.example.algorythmics.presentation.InsertionSortViewModel
 import com.example.algorythmics.presentation.ItemDecoration
 import com.example.algorythmics.presentation.LinearSearchViewModel
-import com.example.algorythmics.presentation.ListUiItem
 import com.example.algorythmics.presentation.MergeSortViewModel
 import com.example.algorythmics.presentation.QuickSortViewModel
 import com.example.algorythmics.presentation.SelectionSortViewModel
@@ -46,6 +46,10 @@ class AnimationFragment : Fragment() {
     private lateinit var algorithmId: String
     private lateinit var etSearchNumber: EditText
 
+    private lateinit var tvAnimationSteps: TextView
+    private var comparisonIndex1 = 0
+    private var comparisonIndex2 = 1
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -68,17 +72,19 @@ class AnimationFragment : Fragment() {
         recyclerView.addItemDecoration(itemDecoration)
         etSearchNumber = view.findViewById(R.id.et_search_number)
 
+        tvAnimationSteps = view.findViewById(R.id.tv_scrollable)
+
 
         sortedListAdapter = SortedListAdapter()
         selectionSortListAdapter = SelectionSortListAdapter()
         mergeSortAdapter = MergeSortAdapter()
         binarySearchAdapter = BinarySearchAdapter()
         recyclerView.adapter = when (algorithmId) {
-                "653d35f6ce1b18cbd8bd14b3" -> selectionSortListAdapter
-                "653d3dfece1b18cbd8bd14b9" -> binarySearchAdapter
-                "653d36ecce1b18cbd8bd14b4" -> mergeSortAdapter
-                else -> sortedListAdapter
-            }
+            "653d35f6ce1b18cbd8bd14b3" -> selectionSortListAdapter
+            "653d3dfece1b18cbd8bd14b9" -> binarySearchAdapter
+            "653d36ecce1b18cbd8bd14b4" -> mergeSortAdapter
+            else -> sortedListAdapter
+        }
 
 
 
@@ -105,9 +111,14 @@ class AnimationFragment : Fragment() {
         }
 
         // LiveData megfigyelése a RecyclerView frissítéséhez
-        sortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
-            sortedListAdapter.submitList(it)
+        sortViewModel.listToSort.observe(viewLifecycleOwner, Observer { list ->
+            sortedListAdapter.submitList(list)
         })
+
+        sortViewModel.comparisonMessage.observe(viewLifecycleOwner, Observer { message ->
+            tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
+        })
+
 
         insertionSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
             sortedListAdapter.submitList(it)
