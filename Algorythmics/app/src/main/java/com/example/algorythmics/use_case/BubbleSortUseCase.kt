@@ -1,5 +1,6 @@
 package com.example.algorythmics.use_case
 
+import com.example.algorythmics.presentation.ListUiItem
 import com.example.algorythmics.retrofit.models.SortInfo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -7,33 +8,34 @@ import kotlinx.coroutines.flow.flow
 
 class BubbleSortUseCase {
 
-    operator fun invoke(list:MutableList<Int>) : Flow<SortInfo> = flow{
-
-        var listSizeToCompare = list.size-1
-        while(listSizeToCompare>1){
-            var innerIterator = 0
-            while(innerIterator<listSizeToCompare){
-                val currentListItem = list[innerIterator]
-                val nextListItem = list[innerIterator+1]
-                emit(
-                    SortInfo(currentItem = innerIterator, shouldSwap = false, hadNoEffect = false)
-                )
+    operator fun invoke(list: MutableList<Int>) : Flow<SortInfo> = flow {
+        val n = list.size
+        for (i in 0 until n - 1) {
+            for (j in 0 until n - i - 1) {
+                emit(SortInfo(currentItem = j, shouldSwap = false, hadNoEffect = false))
                 delay(500)
-                if(currentListItem > nextListItem){
-                    list.swap(innerIterator,innerIterator+1)
-                    emit(
-                        SortInfo(currentItem = innerIterator, shouldSwap = true, hadNoEffect = false)
-                    )
-                }else{
-                    emit(
-                        SortInfo(currentItem = innerIterator, shouldSwap = false, hadNoEffect = true)
-                    )
+                if (list[j] > list[j + 1]) {
+                    list.swap(j, j + 1)
+                    emit(SortInfo(currentItem = j, shouldSwap = true, hadNoEffect = false))
+                } else {
+                    emit(SortInfo(currentItem = j, shouldSwap = false, hadNoEffect = true))
                 }
                 delay(500)
-                innerIterator +=1
             }
-            listSizeToCompare -= 1
         }
+    }
+
+    fun performNextStep(list: MutableList<Int>, currentItemIndex: Int): SortInfo {
+        val nextItemIndex = currentItemIndex + 1
+        if (nextItemIndex < list.size) {
+            val currentItem = list[currentItemIndex]
+            val nextItem = list[nextItemIndex]
+            if (currentItem > nextItem) {
+                list.swap(currentItemIndex, nextItemIndex)
+                return SortInfo(currentItem = currentItemIndex, shouldSwap = true, hadNoEffect = false)
+            }
+        }
+        return SortInfo(currentItem = currentItemIndex, shouldSwap = false, hadNoEffect = true)
     }
 }
 

@@ -5,12 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.algorythmics.use_case.HeapSortUseCase
-import com.example.algorythmics.use_case.swap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.random.Random
 
 class HeapSortViewModel(private val heapSortUseCase: HeapSortUseCase = HeapSortUseCase()) : ViewModel() {
 

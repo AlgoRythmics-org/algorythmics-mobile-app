@@ -1,3 +1,4 @@
+
 package com.example.algorythmics.fragments.course
 
 import android.os.Bundle
@@ -38,6 +39,7 @@ class AnimationFragment : Fragment() {
     private val mergeSortViewModel: MergeSortViewModel by activityViewModels()
     private val heapSortViewModel: HeapSortViewModel by activityViewModels()
     private lateinit var btnSortList: Button
+    private lateinit var secondButton: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var sortedListAdapter: SortedListAdapter
     private lateinit var selectionSortListAdapter: SelectionSortListAdapter
@@ -47,8 +49,7 @@ class AnimationFragment : Fragment() {
     private lateinit var etSearchNumber: EditText
 
     private lateinit var tvAnimationSteps: TextView
-    private var comparisonIndex1 = 0
-    private var comparisonIndex2 = 1
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,6 +68,7 @@ class AnimationFragment : Fragment() {
         algorithmId = arguments?.getString("algorithmId") ?: ""
 
         btnSortList = view.findViewById(R.id.btn_sort_list)
+        secondButton = view.findViewById(R.id.second_button)
         recyclerView = view.findViewById(R.id.rv_container)
         recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         recyclerView.addItemDecoration(itemDecoration)
@@ -107,6 +109,11 @@ class AnimationFragment : Fragment() {
                     val searchNumber2 = etSearchNumber.text.toString().toIntOrNull() ?: return@setOnClickListener
                     binarySearchViewModel.startBinarySearch(searchNumber2)
                 }
+            }
+        }
+        secondButton.setOnClickListener {
+            when (algorithmId) {
+                "65b8db1995d5f3a10bccd361" -> sortViewModel.stepSorting()
             }
         }
 
