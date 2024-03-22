@@ -38,10 +38,16 @@ class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(
         val foundColor = Color.parseColor("#FFA500")
 
         // Az aktuális elem háttérszíne az összehasonlítás vagy találat alapján
-        val backgroundColor = when {
-            item.isCurrentlyCompared -> comparisonColor
-            item.isFound -> foundColor // Ha már megtaláltuk az elemet
-            else -> initialColor
+//        val backgroundColor = when {
+//            item.isCurrentlyCompared -> comparisonColor
+//            item.isFound -> foundColor // Ha már megtaláltuk az elemet
+//            else -> initialColor
+//        }
+
+        val backgroundColor = if (item.isCurrentlyCompared) {
+            Color.parseColor("#FF5733") // Például piros szín az összehasonlított elemekhez
+        } else {
+            Color.parseColor("#1BDBBE") // Például alapértelmezett szín
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)

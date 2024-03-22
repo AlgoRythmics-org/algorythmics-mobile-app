@@ -66,42 +66,57 @@ class SortViewModel(
         }
     }
 
+
     fun stepSorting() {
         viewModelScope.launch {
-            if (!isSortingInProgress && currentStep < _listToSort.value!!.size - 1) {
-                isSortingInProgress = true
-                performNextStep() // Első lépés végrehajtása
-            } else {
-                isSortingInProgress = false
-            }
+            performNextStep() // Egy lépést hajt végre minden híváskor
         }
     }
+
+    private fun isListSorted(): Boolean {
+        val sortedList = _listToSort.value?.map { it.value }?.sorted()
+        val currentList = _listToSort.value?.map { it.value }
+        return sortedList == currentList
+    }
+
+    private var alreadySorted = 0 // Ez a változó nyomon követi, hány elem van már a helyén
 
     private fun performNextStep() {
-        if (currentStep < _listToSort.value!!.size - 1) {
-            val listToSort = _listToSort.value!!.map { it.value }.toMutableList()
-            val swapInfo = bubbleSortUseCase.performNextStep(listToSort, currentStep)
-            val newList = _listToSort.value!!.toMutableList()
+        if (!isListSorted()) {
+            if (currentStep < _listToSort.value!!.size - 1 - alreadySorted) {
+                val listToSort = _listToSort.value!!.map { it.value }.toMutableList()
+                val swapInfo = bubbleSortUseCase.performNextStep(listToSort, currentStep)
+                val newList = _listToSort.value!!.toMutableList()
 
-            if (swapInfo.shouldSwap) {
-                val firstItem = newList[currentStep].copy(isCurrentlyCompared = false)
-                newList[currentStep] = newList[currentStep + 1].copy(isCurrentlyCompared = false)
-                newList[currentStep + 1] = firstItem
-                _comparisonMessage.postValue("Elemek felcserélve: ${newList[currentStep].value} és ${newList[currentStep + 1].value}")
+                // Összehasonlított elemek színének beállítása
+                val firstComparedIndex = currentStep
+                val secondComparedIndex = currentStep + 1
+                newList[firstComparedIndex] = newList[firstComparedIndex].copy(isCurrentlyCompared = true)
+                newList[secondComparedIndex] = newList[secondComparedIndex].copy(isCurrentlyCompared = true)
+
+                if (swapInfo.shouldSwap) {
+                    val firstItem = newList[currentStep].copy(isCurrentlyCompared = false)
+                    newList[currentStep] = newList[currentStep + 1].copy(isCurrentlyCompared = false)
+                    newList[currentStep + 1] = firstItem
+                    _comparisonMessage.postValue("Elemek felcserélve: ${newList[currentStep].value} és ${newList[currentStep + 1].value}")
+                }
+                if (swapInfo.hadNoEffect) {
+                    newList[currentStep] = newList[currentStep].copy(isCurrentlyCompared = false)
+                    newList[currentStep + 1] = newList[currentStep + 1].copy(isCurrentlyCompared = false)
+                    _comparisonMessage.postValue("Elemek nem cseréltek helyet: ${newList[currentStep].value} és ${newList[currentStep + 1].value}")
+                }
+                _listToSort.postValue(newList)
+
+                val step = "Step: $currentStep, Comparison: ${swapInfo.currentItem}, Should Swap: ${swapInfo.shouldSwap}, Had No Effect: ${swapInfo.hadNoEffect}"
+                _animationSteps.postValue(step)
+
+                currentStep++
+            } else {
+                currentStep = 0
+                isSortingInProgress = false
+                alreadySorted++
             }
-            if (swapInfo.hadNoEffect) {
-                newList[currentStep] = newList[currentStep].copy(isCurrentlyCompared = false)
-                newList[currentStep + 1] = newList[currentStep + 1].copy(isCurrentlyCompared = false)
-                _comparisonMessage.postValue("Elemek nem cseréltek helyet: ${newList[currentStep].value} és ${newList[currentStep + 1].value}")
-            }
-            _listToSort.postValue(newList)
-
-            val step = "Step: $currentStep, Comparison: ${swapInfo.currentItem}, Should Swap: ${swapInfo.shouldSwap}, Had No Effect: ${swapInfo.hadNoEffect}"
-            _animationSteps.postValue(step)
-
-            currentStep++ // Lépés léptetése a következőhöz
-        } else {
-            isSortingInProgress = false
         }
     }
+
 }
