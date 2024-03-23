@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.algorythmics.fragments.course.SortedListAdapter
 import com.example.algorythmics.use_case.BubbleSortUseCase
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -51,13 +52,17 @@ class SortViewModel(
                     val firstItem = newList[currentItemIndex].copy(isCurrentlyCompared = false)
                     newList[currentItemIndex] = newList[currentItemIndex + 1].copy(isCurrentlyCompared = false)
                     newList[currentItemIndex + 1] = firstItem
-                    _comparisonMessage.postValue("Elemek felcserélve: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
-                }
-                if (swapInfo.hadNoEffect) {
+                    val comparisonMessage = "Összehasonlítva: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}"
+                    _comparisonMessage.postValue("$comparisonMessage\nElemek felcserélve: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
+                } else if (swapInfo.hadNoEffect) {
                     newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = false)
                     newList[currentItemIndex + 1] = newList[currentItemIndex + 1].copy(isCurrentlyCompared = false)
-                    _comparisonMessage.postValue("Elemek nem cseréltek helyet: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
+                    val comparisonMessage = "Összehasonlítva: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}"
+                    _comparisonMessage.postValue("$comparisonMessage\nElemek nem cseréltek helyet: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
                 }
+
+
+
                 _listToSort.value = newList
 
                 val step = "Step: $currentItemIndex, Comparison: ${swapInfo.currentItem}, Should Swap: ${swapInfo.shouldSwap}, Had No Effect: ${swapInfo.hadNoEffect}"
@@ -67,9 +72,11 @@ class SortViewModel(
     }
 
 
+
     fun stepSorting() {
         viewModelScope.launch {
             performNextStep() // Egy lépést hajt végre minden híváskor
+
         }
     }
 
@@ -94,21 +101,28 @@ class SortViewModel(
                 newList[firstComparedIndex] = newList[firstComparedIndex].copy(isCurrentlyCompared = true)
                 newList[secondComparedIndex] = newList[secondComparedIndex].copy(isCurrentlyCompared = true)
 
+                val comparisonMessage = "Összehasonlítva: ${newList[firstComparedIndex].value} és ${newList[secondComparedIndex].value}"
+                _comparisonMessage.postValue(comparisonMessage)
+
                 if (swapInfo.shouldSwap) {
                     val firstItem = newList[currentStep].copy(isCurrentlyCompared = false)
                     newList[currentStep] = newList[currentStep + 1].copy(isCurrentlyCompared = false)
                     newList[currentStep + 1] = firstItem
-                    _comparisonMessage.postValue("Elemek felcserélve: ${newList[currentStep].value} és ${newList[currentStep + 1].value}")
+                    _comparisonMessage.postValue("$comparisonMessage\nElemek felcserélve: ${newList[currentStep].value} és ${newList[currentStep + 1].value}")
                 }
                 if (swapInfo.hadNoEffect) {
                     newList[currentStep] = newList[currentStep].copy(isCurrentlyCompared = false)
                     newList[currentStep + 1] = newList[currentStep + 1].copy(isCurrentlyCompared = false)
-                    _comparisonMessage.postValue("Elemek nem cseréltek helyet: ${newList[currentStep].value} és ${newList[currentStep + 1].value}")
+                    _comparisonMessage.postValue("$comparisonMessage\nElemek nem cseréltek helyet: ${newList[currentStep].value} és ${newList[currentStep + 1].value}")
                 }
                 _listToSort.postValue(newList)
 
                 val step = "Step: $currentStep, Comparison: ${swapInfo.currentItem}, Should Swap: ${swapInfo.shouldSwap}, Had No Effect: ${swapInfo.hadNoEffect}"
                 _animationSteps.postValue(step)
+
+                // Összehasonlított elemek színének visszaállítása
+                newList[firstComparedIndex] = newList[firstComparedIndex].copy(isCurrentlyCompared = false)
+                newList[secondComparedIndex] = newList[secondComparedIndex].copy(isCurrentlyCompared = false)
 
                 currentStep++
             } else {
@@ -118,5 +132,6 @@ class SortViewModel(
             }
         }
     }
+
 
 }
