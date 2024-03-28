@@ -25,6 +25,7 @@ class BubbleSortUseCase {
         }
     }
 
+
     fun performNextStep(list: MutableList<Int>, currentItemIndex: Int): SortInfo {
         val nextItemIndex = currentItemIndex + 1
         if (nextItemIndex < list.size) {

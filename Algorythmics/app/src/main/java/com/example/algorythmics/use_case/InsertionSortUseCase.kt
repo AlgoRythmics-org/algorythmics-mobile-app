@@ -11,19 +11,25 @@ class InsertionSortUseCase {
             val key = list[i]
             var j = i - 1
 
-            emit(SortInfo(currentItem = i, shouldSwap = false, hadNoEffect = false))
+            // Csak az aktuális elemet jelöljük pirosnak
+            emit(SortInfo(currentItem = i, shouldSwap = false, hadNoEffect = true))
             delay(500)
 
             while (j >= 0 && list[j] > key) {
-                list[j + 1] = list[j]
+                // Csak az aktuális elemet és a vele összehasonlított elemet jelöljük pirosnak
                 emit(SortInfo(currentItem = j, shouldSwap = true, hadNoEffect = false))
                 delay(500)
+                list[j + 1] = list[j]
                 j--
             }
+
             list[j + 1] = key
-            emit(SortInfo(currentItem = j + 1, shouldSwap = false, hadNoEffect = false))
-            delay(500)
+
+            // A rendezett elemek visszaállítása szürkére
+            for (k in 0 until i + 1) {
+                emit(SortInfo(currentItem = k, shouldSwap = false, hadNoEffect = true))
+                delay(500)
+            }
         }
     }
-
 }

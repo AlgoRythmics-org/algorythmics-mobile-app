@@ -116,6 +116,7 @@ class AnimationFragment : Fragment() {
         secondButton.setOnClickListener {
             when (algorithmId) {
                 "65b8db1995d5f3a10bccd361" -> sortViewModel.stepSorting()
+               // "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.startStepSelectionSort()
             }
         }
 

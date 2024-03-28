@@ -1,5 +1,6 @@
 package com.example.algorythmics.fragments.course
 
+import android.animation.ObjectAnimator
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.graphics.Color
 import android.os.Handler
+import android.view.animation.Animation
+import android.view.animation.TranslateAnimation
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -52,6 +55,29 @@ class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapte
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
+
+        // Az animáció meghívása minden elemre
+        animateCup(holder.itemView)
+    }
+
+    // A függvényt módosítani kell, hogy a megfelelő nézetet kapja meg paraméterként
+    private fun animateCup(view: View) {
+        val animation = TranslateAnimation(0f, 0f, 0f, -100f)
+        animation.duration = 500
+
+        val cupImageView = view.findViewById<View>(R.id.rv_container)
+
+        animation.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation) {}
+
+            override fun onAnimationEnd(animation: Animation) {
+                cupImageView.translationY = 0f
+            }
+
+            override fun onAnimationRepeat(animation: Animation) {}
+        })
+
+        cupImageView.startAnimation(animation)
     }
 
 

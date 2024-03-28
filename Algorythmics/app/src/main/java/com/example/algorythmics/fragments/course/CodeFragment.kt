@@ -1,60 +1,68 @@
 package com.example.algorythmics.fragments.course
 
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.style.ClickableSpan
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.algorythmics.R
+import com.example.algorythmics.adapters.SentenceAdapter
+import com.example.algorythmics.adapters.WordsAdapter
+import com.example.algorythmics.callback.DropListener
+import com.example.algorythmics.databinding.FragmentCodeBinding
+import com.google.android.flexbox.AlignItems
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [CodeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class CodeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var binding: FragmentCodeBinding
+    private val words = mutableListOf("world", "a", "!", "What", "wonderful")
+    private var selectedWord = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_code, container, false)
+    ): View {
+        binding = FragmentCodeBinding.inflate(inflater, container, false)
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment CodeFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            CodeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+
+        val sentenceAdapter = SentenceAdapter()
+        val wordsAdapter = WordsAdapter {
+            selectedWord = it
+        }.apply {
+            submitList(words)
+        }
+
+        binding.rvSentence.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.rvSentence.adapter = sentenceAdapter
+
+        binding.rvSentence.setOnDragListener(
+            DropListener {
+                wordsAdapter.removeItem(selectedWord)
+                sentenceAdapter.addItem(selectedWord)
             }
+        )
+
+        binding.rvWords.layoutManager = FlexboxLayoutManager(requireContext(), FlexDirection.ROW, FlexWrap.WRAP).apply {
+            justifyContent = JustifyContent.SPACE_EVENLY
+            alignItems = AlignItems.CENTER
+        }
+
+        binding.rvWords.adapter = wordsAdapter
     }
 }

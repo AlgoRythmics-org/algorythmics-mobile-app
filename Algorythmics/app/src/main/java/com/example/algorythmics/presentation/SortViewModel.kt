@@ -1,11 +1,11 @@
 package com.example.algorythmics.presentation
-
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.algorythmics.fragments.course.SortedListAdapter
 import com.example.algorythmics.use_case.BubbleSortUseCase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -18,7 +18,6 @@ class SortViewModel(
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
     private val _animationSteps = MutableLiveData<String>()
-    val animationSteps: LiveData<String> get() = _animationSteps
 
     private val _comparisonMessage = MutableLiveData<String>()
     val comparisonMessage: LiveData<String> = _comparisonMessage
@@ -32,7 +31,6 @@ class SortViewModel(
             list.add(
                 ListUiItem(
                     id = i,
-                    isCurrentlyCompared = false,
                     value = Random.nextInt(150)
                 )
             )
@@ -42,6 +40,8 @@ class SortViewModel(
 
     fun startSorting() {
         viewModelScope.launch {
+            var lastSortedIndex = _listToSort.value!!.lastIndex
+            var pass = 0
             bubbleSortUseCase(_listToSort.value!!.map { it.value }.toMutableList()).collect { swapInfo ->
                 val currentItemIndex = swapInfo.currentItem
                 val newList = _listToSort.value!!.toMutableList()
@@ -61,17 +61,23 @@ class SortViewModel(
                     _comparisonMessage.postValue("$comparisonMessage\nElemek nem cseréltek helyet: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
                 }
 
-
-
                 _listToSort.value = newList
 
-                val step = "Step: $currentItemIndex, Comparison: ${swapInfo.currentItem}, Should Swap: ${swapInfo.shouldSwap}, Had No Effect: ${swapInfo.hadNoEffect}"
+                val step = "Pass: $pass, Comparison: ${swapInfo.currentItem}, Should Swap: ${swapInfo.shouldSwap}, Had No Effect: ${swapInfo.hadNoEffect}"
                 _animationSteps.postValue(step)
+
+                // Ellenőrzés, hogy a sorrend rendezett-e
+                val isSorted = newList.zipWithNext { a, b -> a.value <= b.value }.all { it }
+                if (isSorted) {
+                    // Az aktuális passzhoz tartozó elemet szürkévé tesszük
+                    newList[lastSortedIndex] = newList[lastSortedIndex].copy(isSorted = true)
+                    lastSortedIndex = if (lastSortedIndex > 0) lastSortedIndex - 1 else lastSortedIndex
+                    _listToSort.postValue(newList)
+                    pass++
+                }
             }
         }
     }
-
-
 
     fun stepSorting() {
         viewModelScope.launch {
@@ -132,6 +138,5 @@ class SortViewModel(
             }
         }
     }
-
 
 }

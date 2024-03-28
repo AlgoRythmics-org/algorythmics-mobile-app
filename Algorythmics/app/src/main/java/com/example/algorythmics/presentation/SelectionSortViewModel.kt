@@ -18,11 +18,10 @@ class SelectionSortViewModel
 
     init {
         val list = mutableListOf<ListUiItem>()
-        for (i in 0 until 9) {
+        for (i in 0 until 10) {
             list.add(
                 ListUiItem(
                     id = i,
-                    isCurrentlyCompared = false,
                     value = Random.nextInt(150)
                 )
             )
@@ -61,4 +60,6 @@ class SelectionSortViewModel
             _listToSort.value = finalList
         }
     }
+
+
 }

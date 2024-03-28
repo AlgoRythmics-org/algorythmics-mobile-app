@@ -30,27 +30,45 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
     fun startInsertionSorting() {
         viewModelScope.launch {
             _listToSort.value?.let { list ->
+                var lastSortedIndex = 0
                 insertionSortUseCase(list.map { it.value }.toMutableList()).collect { swapInfo ->
                     val currentItemIndex = swapInfo.currentItem
-                    val newList = _listToSort.value!!.toMutableList() // Frissítettük az értéket
+                    val newList = _listToSort.value!!.toMutableList()
 
-                    if (currentItemIndex >= newList.size || currentItemIndex + 1 >= newList.size) return@collect // Index ellenőrzés
-
-                    newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = true)
-                    newList[currentItemIndex + 1] = newList[currentItemIndex + 1].copy(isCurrentlyCompared = true)
+                    // Az aktuálisan összehasonlított elemeket jelöljük pirosnak
+                    for (i in lastSortedIndex until currentItemIndex + 2) {
+                        newList[i] = newList[i].copy(isCurrentlyCompared = true)
+                    }
 
                     if (swapInfo.shouldSwap) {
-                        val firstItem = newList.removeAt(currentItemIndex) // Elem eltávolítása
-                        newList.add(currentItemIndex + 1, firstItem) // Elem beszúrása a megfelelő helyre
+                        val firstItem = newList.removeAt(currentItemIndex)
+                        newList.add(currentItemIndex + 1, firstItem)
                     }
 
                     if (swapInfo.hadNoEffect) {
-                        newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = false)
-                        newList[currentItemIndex + 1] = newList[currentItemIndex + 1].copy(isCurrentlyCompared = false)
+                        // Visszaállítjuk a szürke színt azokra az elemekre, amelyek nem kerültek cserére
+                        for (i in lastSortedIndex until currentItemIndex + 2) {
+                            newList[i] = newList[i].copy(isCurrentlyCompared = false)
+                        }
                     }
+
+                    // A rendezett elemek visszaállítása szürkére, kivéve az aktuális elemeket
+                    for (i in lastSortedIndex until currentItemIndex) {
+                        newList[i] = newList[i].copy(isSorted = true)
+                    }
+
+                    // Az új elem rendezettségének beállítása
+                    if (swapInfo.hadNoEffect) {
+                        newList[currentItemIndex] = newList[currentItemIndex].copy(isSorted = true)
+                    }
+
                     _listToSort.value = newList
+                    lastSortedIndex = currentItemIndex + 1
                 }
             }
         }
     }
+
+
+
 }
