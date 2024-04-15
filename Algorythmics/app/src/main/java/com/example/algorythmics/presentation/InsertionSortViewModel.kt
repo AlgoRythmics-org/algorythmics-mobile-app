@@ -4,23 +4,27 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.algorythmics.animation.SortingViewModel
 import com.example.algorythmics.use_case.InsertionSortUseCase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseCase = InsertionSortUseCase()) : ViewModel() {
+class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseCase = InsertionSortUseCase())
+    : SortingViewModel() {
 
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
     init {
         val list = mutableListOf<ListUiItem>()
-        for (i in 0 until 10) {
+        for ((i, item) in insertionSortUseCase.items.withIndex())
+        {
+
             list.add(
                 ListUiItem(
                     id = i,
-                    isCurrentlyCompared = false,
-                    value = Random.nextInt(150)
+                    value = item
                 )
             )
         }
@@ -29,14 +33,14 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
 
     fun startInsertionSorting() {
         viewModelScope.launch {
-            _listToSort.value?.let { list ->
+            _listToSort.value?.let {
                 var lastSortedIndex = 0
-                insertionSortUseCase(list.map { it.value }.toMutableList()).collect { swapInfo ->
+                insertionSortUseCase().collect { swapInfo ->
                     val currentItemIndex = swapInfo.currentItem
                     val newList = _listToSort.value!!.toMutableList()
 
                     // Az aktuálisan összehasonlított elemeket jelöljük pirosnak
-                    for (i in lastSortedIndex until currentItemIndex + 2) {
+                    for (i in lastSortedIndex until currentItemIndex ) {
                         newList[i] = newList[i].copy(isCurrentlyCompared = true)
                     }
 
@@ -47,7 +51,7 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
 
                     if (swapInfo.hadNoEffect) {
                         // Visszaállítjuk a szürke színt azokra az elemekre, amelyek nem kerültek cserére
-                        for (i in lastSortedIndex until currentItemIndex + 2) {
+                        for (i in lastSortedIndex until currentItemIndex + 1) {
                             newList[i] = newList[i].copy(isCurrentlyCompared = false)
                         }
                     }
@@ -68,7 +72,6 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
             }
         }
     }
-
 
 
 }

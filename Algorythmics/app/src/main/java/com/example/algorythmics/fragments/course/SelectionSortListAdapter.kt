@@ -20,17 +20,10 @@ import com.example.algorythmics.retrofit.models.SelectionSortInfo
 
 class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapter.ViewHolder>(DiffCallback) {
 
-
     private var smallestItemIndex: Int = -1
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView: TextView = itemView.findViewById(R.id.text_view)
-        init {
-            // Állíts be egy kis padding-et az elem aljához
-            val layoutParams = itemView.layoutParams as RecyclerView.LayoutParams
-            layoutParams.bottomMargin = 8 // Válassz megfelelő padding-et vagy margin-t
-            itemView.layoutParams = layoutParams
-        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectionSortListAdapter.ViewHolder {
@@ -46,43 +39,26 @@ class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapte
 
         val initialColor = Color.parseColor("#1BDBBE")
         val smallestItemColor = Color.RED
+        val replacedItemColor = Color.GRAY
 
-        // Az aktuális elem háttérszíne az összehasonlítás alapján
-        val backgroundColor = if (item.isCurrentlyCompared) {
-            smallestItemColor // Az az elem, ami éppen az aktuális legkisebb, piros legyen
-        } else {
-            initialColor // Egyébként a többi elem maradjon az eredeti háttérszínén
+        // Determine the background color based on the state of the item
+        val backgroundColor = when {
+            position == smallestItemIndex -> smallestItemColor // Smallest item is red
+            item.isCurrentlyCompared -> initialColor // Other currently compared items stay green
+            else -> initialColor // Default color for other items
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
-
-        // Az animáció meghívása minden elemre
-        animateCup(holder.itemView)
     }
 
-    // A függvényt módosítani kell, hogy a megfelelő nézetet kapja meg paraméterként
-    private fun animateCup(view: View) {
-        val animation = TranslateAnimation(0f, 0f, 0f, -100f)
-        animation.duration = 500
-
-        val cupImageView = view.findViewById<View>(R.id.rv_container)
-
-        animation.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {}
-
-            override fun onAnimationEnd(animation: Animation) {
-                cupImageView.translationY = 0f
-            }
-
-            override fun onAnimationRepeat(animation: Animation) {}
-        })
-
-        cupImageView.startAnimation(animation)
-    }
-
-
+    // Update the index of the smallest item and notify adapter of the change
     fun updateSmallestItemIndex(index: Int) {
         smallestItemIndex = index
+        notifyDataSetChanged()
+    }
+
+    fun resetSmallestItemIndex() {
+        smallestItemIndex = -1 // Reset the index when the smallest item is replaced
         notifyDataSetChanged()
     }
 

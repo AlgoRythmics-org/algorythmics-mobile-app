@@ -8,6 +8,7 @@ data class ListUiItem(
     var isInitialColorNeeded: Boolean = true,
     var isSorted: Boolean = false,
     var isFound: Boolean = false,
-    val needsColorUpdate: Boolean = false
+    val needsColorUpdate: Boolean = false,
+    var shouldMove: Boolean = false
 
 )

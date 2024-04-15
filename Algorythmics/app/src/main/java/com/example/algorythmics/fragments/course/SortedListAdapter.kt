@@ -39,9 +39,8 @@ class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
+
     }
-
-
 
 
     private fun calculateHeight(value: Int): Int {
@@ -57,9 +56,6 @@ class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(
     }
 
 
-    fun updateList(newList: List<ListUiItem>) {
-        submitList(newList)
-    }
 
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<ListUiItem>() {

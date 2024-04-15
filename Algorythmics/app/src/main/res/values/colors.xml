@@ -36,4 +36,5 @@
     <color name="colorGradStart">#FDC830</color>
     <color name="colorGradEnd">#F37335</color>
     <color name="colorWhiteTransparent">#7CFFFFFF</color>
+    <color name="colorAccent">#FF4081</color>
 </resources>

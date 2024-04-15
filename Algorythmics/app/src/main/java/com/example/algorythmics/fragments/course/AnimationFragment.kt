@@ -15,7 +15,9 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
+import com.example.algorythmics.animation.BubbleSort
 import com.example.algorythmics.presentation.BinarySearchViewModel
+import com.example.algorythmics.presentation.BubbleSortViewModel
 import com.example.algorythmics.presentation.HeapSortViewModel
 import com.example.algorythmics.presentation.InsertionSortViewModel
 import com.example.algorythmics.presentation.ItemDecoration
@@ -24,14 +26,14 @@ import com.example.algorythmics.presentation.MergeSortViewModel
 import com.example.algorythmics.presentation.QuickSortViewModel
 import com.example.algorythmics.presentation.SelectionSortViewModel
 import com.example.algorythmics.presentation.ShellSortViewModel
-import com.example.algorythmics.presentation.SortViewModel
+
 
 
 
 
 class AnimationFragment : Fragment() {
 
-    private val sortViewModel: SortViewModel by activityViewModels()
+    private val bubbleSortViewModel: BubbleSortViewModel by activityViewModels()
     private val insertionSortViewModel: InsertionSortViewModel by activityViewModels()
     private val selectionSortViewModel: SelectionSortViewModel by activityViewModels()
     private val shellSortViewModel: ShellSortViewModel by activityViewModels()
@@ -51,6 +53,7 @@ class AnimationFragment : Fragment() {
     private lateinit var etSearchNumber: EditText
 
     private lateinit var tvAnimationSteps: TextView
+
 
 
     override fun onCreateView(
@@ -78,6 +81,8 @@ class AnimationFragment : Fragment() {
 
         tvAnimationSteps = view.findViewById(R.id.tv_scrollable)
 
+       // val bubbleSort = BubbleSort()
+
 
         sortedListAdapter = SortedListAdapter()
         selectionSortListAdapter = SelectionSortListAdapter()
@@ -96,7 +101,7 @@ class AnimationFragment : Fragment() {
         btnSortList.setOnClickListener {
             // Az algoritmus azonosítójának alapján döntsön, hogy melyik ViewModel-et használja
             when (algorithmId) {
-                "65b8db1995d5f3a10bccd361" -> sortViewModel.startSorting()
+                "65b8db1995d5f3a10bccd361" -> bubbleSortViewModel.startSorting()
                 "653d32ffce1b18cbd8bd14b2" -> insertionSortViewModel.startInsertionSorting()
                 "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.startSelectionSorting()
                 "653d3c49ce1b18cbd8bd14b7" -> shellSortViewModel.startShellSorting()
@@ -115,17 +120,17 @@ class AnimationFragment : Fragment() {
         }
         secondButton.setOnClickListener {
             when (algorithmId) {
-                "65b8db1995d5f3a10bccd361" -> sortViewModel.stepSorting()
+                "65b8db1995d5f3a10bccd361" -> bubbleSortViewModel.stepSorting()
                // "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.startStepSelectionSort()
             }
         }
 
         // LiveData megfigyelése a RecyclerView frissítéséhez
-        sortViewModel.listToSort.observe(viewLifecycleOwner, Observer { list ->
+        bubbleSortViewModel.listToSort.observe(viewLifecycleOwner, Observer { list ->
             sortedListAdapter.submitList(list)
         })
 
-        sortViewModel.comparisonMessage.observe(viewLifecycleOwner, Observer { message ->
+        bubbleSortViewModel.comparisonMessage.observe(viewLifecycleOwner, Observer { message ->
             tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
         })
 

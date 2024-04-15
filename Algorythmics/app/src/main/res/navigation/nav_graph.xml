@@ -13,9 +13,26 @@
             android:id="@+id/action_coursesFragment_to_coursesDetailFragment"
             app:destination="@id/coursesDetailFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/coursesDetailFragment"
         android:name="com.example.algorythmics.fragments.course.CoursesDetailFragment"
         android:label="fragment_courses_detail"
         tools:layout="@layout/fragment_courses_detail" />
+
+
+    <fragment
+        android:id="@+id/quizFragment"
+        android:name="com.example.algorythmics.fragments.course.QuizFragment"
+        android:label="QuizFragment" >
+        <action
+            android:id="@+id/action_quizFragment_to_scoreFragment"
+            app:destination="@id/scoreFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/scoreFragment"
+        android:name="com.example.algorythmics.fragments.course.ScoreFragment"
+        android:label="ScoreFragment" >
+    </fragment>
 </navigation>

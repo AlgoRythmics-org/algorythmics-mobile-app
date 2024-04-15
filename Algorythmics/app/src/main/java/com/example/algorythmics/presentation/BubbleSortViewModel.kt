@@ -1,18 +1,18 @@
 package com.example.algorythmics.presentation
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.algorythmics.animation.SortingViewModel
 import com.example.algorythmics.use_case.BubbleSortUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
-class SortViewModel(
+class BubbleSortViewModel(
     private val bubbleSortUseCase: BubbleSortUseCase = BubbleSortUseCase(),
-) : ViewModel() {
+) : SortingViewModel() {
 
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
@@ -27,22 +27,25 @@ class SortViewModel(
 
     init {
         val list = mutableListOf<ListUiItem>()
-        for (i in 0 until 10) {
+        for ((i, item) in bubbleSortUseCase.items.withIndex())
+         {
+
             list.add(
                 ListUiItem(
                     id = i,
-                    value = Random.nextInt(150)
+                    value = item
                 )
             )
-        }
+         }
         _listToSort.value = list
     }
 
-    fun startSorting() {
+    override fun startSorting() {
         viewModelScope.launch {
+            super.startSorting()
             var lastSortedIndex = _listToSort.value!!.lastIndex
             var pass = 0
-            bubbleSortUseCase(_listToSort.value!!.map { it.value }.toMutableList()).collect { swapInfo ->
+            bubbleSortUseCase().collect { swapInfo ->
                 val currentItemIndex = swapInfo.currentItem
                 val newList = _listToSort.value!!.toMutableList()
                 newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = true)
@@ -66,25 +69,17 @@ class SortViewModel(
                 val step = "Pass: $pass, Comparison: ${swapInfo.currentItem}, Should Swap: ${swapInfo.shouldSwap}, Had No Effect: ${swapInfo.hadNoEffect}"
                 _animationSteps.postValue(step)
 
-                // Ellenőrzés, hogy a sorrend rendezett-e
-                val isSorted = newList.zipWithNext { a, b -> a.value <= b.value }.all { it }
-                if (isSorted) {
-                    // Az aktuális passzhoz tartozó elemet szürkévé tesszük
-                    newList[lastSortedIndex] = newList[lastSortedIndex].copy(isSorted = true)
-                    lastSortedIndex = if (lastSortedIndex > 0) lastSortedIndex - 1 else lastSortedIndex
-                    _listToSort.postValue(newList)
-                    pass++
-                }
             }
         }
     }
 
     fun stepSorting() {
         viewModelScope.launch {
-            performNextStep() // Egy lépést hajt végre minden híváskor
+            performNextStep()
 
         }
     }
+
 
     private fun isListSorted(): Boolean {
         val sortedList = _listToSort.value?.map { it.value }?.sorted()
@@ -94,7 +89,7 @@ class SortViewModel(
 
     private var alreadySorted = 0 // Ez a változó nyomon követi, hány elem van már a helyén
 
-    private fun performNextStep() {
+    private suspend fun performNextStep() {
         if (!isListSorted()) {
             if (currentStep < _listToSort.value!!.size - 1 - alreadySorted) {
                 val listToSort = _listToSort.value!!.map { it.value }.toMutableList()
@@ -106,6 +101,7 @@ class SortViewModel(
                 val secondComparedIndex = currentStep + 1
                 newList[firstComparedIndex] = newList[firstComparedIndex].copy(isCurrentlyCompared = true)
                 newList[secondComparedIndex] = newList[secondComparedIndex].copy(isCurrentlyCompared = true)
+                delay(800)
 
                 val comparisonMessage = "Összehasonlítva: ${newList[firstComparedIndex].value} és ${newList[secondComparedIndex].value}"
                 _comparisonMessage.postValue(comparisonMessage)
@@ -139,4 +135,5 @@ class SortViewModel(
         }
     }
 
+    
 }
