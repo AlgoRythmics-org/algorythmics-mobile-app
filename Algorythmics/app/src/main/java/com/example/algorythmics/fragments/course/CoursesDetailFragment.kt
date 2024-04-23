@@ -98,7 +98,18 @@ class CoursesDetailFragment : Fragment() {
         }
 
         quizCardView.setOnClickListener {
-            navigateToFragment(QuizFragment())
+            val algorithmId = arguments?.getString("algorithmId")
+            if (algorithmId != null) {
+                val quizFragment = QuizFragment().apply {
+                    arguments = Bundle().apply {
+                        putString("algorithmId", algorithmId)
+                    }
+                }
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainer, quizFragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
         }
 
         return view

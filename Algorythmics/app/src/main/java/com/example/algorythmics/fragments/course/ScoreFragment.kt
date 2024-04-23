@@ -25,7 +25,7 @@ class ScoreFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        score = arguments?.getInt("Score", 0) ?: 0
+        score = arguments?.getInt("score", 0) ?: 0
 
         binding.apply {
             scoreTxt.text = score.toString()

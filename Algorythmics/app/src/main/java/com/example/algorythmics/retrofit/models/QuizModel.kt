@@ -2,6 +2,7 @@ package com.example.algorythmics.retrofit.models
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 
 data class QuizModel(
     val id: Int,
@@ -11,8 +12,10 @@ data class QuizModel(
     val answer3: String?,
     val answer4: String?,
     val correctAnswer: String?,
-    val score: Int,
-    var clickedAnswer: String?
+    val score: Double,
+    var clickedAnswer: String?,
+    @SerializedName("algorithm_id")
+    val algorithmId: String?
 ): Parcelable{
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
@@ -22,7 +25,8 @@ data class QuizModel(
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
-        parcel.readInt(),
+        parcel.readDouble(),
+        parcel.readString(),
         parcel.readString()
     ) {
     }
@@ -35,8 +39,9 @@ data class QuizModel(
         parcel.writeString(answer3)
         parcel.writeString(answer4)
         parcel.writeString(correctAnswer)
-        parcel.writeInt(score)
+        parcel.writeInt(score.toInt())
         parcel.writeString(clickedAnswer)
+        parcel.writeString(algorithmId)
     }
 
     override fun describeContents(): Int {

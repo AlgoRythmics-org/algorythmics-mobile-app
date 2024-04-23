@@ -2,15 +2,21 @@ package com.example.algorythmics.fragments.course
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.algorythmics.R
 import com.example.algorythmics.adapters.QuestionAdapter
 import com.example.algorythmics.databinding.FragmentQuizBinding
 import com.example.algorythmics.retrofit.models.QuizModel
+import com.example.algorythmics.retrofit.repositories.QuizRepository
+import com.example.algorythmics.retrofit.repositories.VideoRepository
+import kotlinx.coroutines.launch
 
 class QuizFragment : Fragment(), QuestionAdapter.Score {
 
@@ -21,8 +27,9 @@ class QuizFragment : Fragment(), QuestionAdapter.Score {
     private lateinit var receivedList: MutableList<QuizModel>
     private var allScore = 0
 
-    private lateinit var questionAdapter: QuestionAdapter
+    private val quizRepository = QuizRepository()
 
+    private lateinit var questionAdapter: QuestionAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,22 +42,47 @@ class QuizFragment : Fragment(), QuestionAdapter.Score {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-       // receivedList = arguments?.getParcelableArrayList<QuestionModel>("list")!!.toMutableList()
 
-        receivedList = mutableListOf(
-            QuizModel(4, "Kérdés 1", "Válasz 112", "Válasz 2", "Válasz 3", "Válasz 4", "a", 5, null),
-            QuizModel(2, "Kérdés 12", "Válasz 1", "Válasz 2", "Válasz 3", "Válasz 4", "b", 5, null),
-            QuizModel(3, "Kérdés 13", "Válaszok", "Válasz 2", "Válasz 3", "Válasz 4", "a", 5, null),
-            QuizModel(4, "Kérdés 1", "Válasz 1", "Válasz 2", "Válasz 3", "Válasz 4", "d", 5, null),
-            QuizModel(5, "Kérdés 1", "Válasz 1", "Válasz 2", "Válasz 3", "Válasz 4", "c", 5, null),
-            QuizModel(6, "Kérdés 1", "Válasz 1", "Válasz 2", "Válasz 3", "Válasz 4", "a", 5, null),
-            QuizModel(7, "Kérdés 1", "Válasz 1", "Válasz 2", "Válasz 3", "Válasz 4", "b", 5, null),
-            QuizModel(8, "Kérdés 1", "Válasz 1", "Válasz 2", "Válasz 3", "Válasz 4", "c", 5, null),
-            QuizModel(9, "Kérdés 1", "Válasz 1", "Válasz 2", "Válasz 3", "Válasz 4", "d", 5, null),
-            QuizModel(10, "Kérdés 1", "Válasz 1", "Válasz 2", "Válasz 3", "Válasz 4", "a", 5, null)
+//        lifecycleScope.launch {
+//            try {
+//
+//                receivedList = quizRepository.getAllQuiz().toMutableList()
+//
+//                setupUI()
+//                questionAdapter = QuestionAdapter("", mutableListOf(), this@QuizFragment )
+//                binding.questionList.apply {
+//                    layoutManager = LinearLayoutManager(requireContext())
+//                    adapter = questionAdapter
+//                }
+//            } catch (e: Exception) {
+//                showError("Error loading quiz: ${e.message}")
+//            }
+//        }
 
-        )
-        setupUI()
+        lifecycleScope.launch {
+            try {
+                // Az összes quiz betöltése
+                receivedList = quizRepository.getAllQuiz().toMutableList()
+
+                // Az aktuális algoritmus azonosítója
+                val currentAlgorithmId = arguments?.getString("algorithmId")
+
+                // Szűrés az aktuális algoritmus azonosítójával megegyező quiz modellekre
+                receivedList = receivedList.filter { it.algorithmId == currentAlgorithmId }.toMutableList()
+
+                // UI beállítása és adapter inicializálása
+                setupUI()
+                questionAdapter = QuestionAdapter("", mutableListOf(), this@QuizFragment )
+                binding.questionList.apply {
+                    layoutManager = LinearLayoutManager(requireContext())
+                    adapter = questionAdapter
+                }
+            } catch (e: Exception) {
+                showError("Error loading quiz: ${e.message}")
+            }
+        }
+
+
 
         questionAdapter = QuestionAdapter("", mutableListOf(), this)
         binding.questionList.apply {
@@ -113,7 +145,7 @@ class QuizFragment : Fragment(), QuestionAdapter.Score {
         users.add(receivedList[position].answer3.toString())
         users.add(receivedList[position].answer4.toString())
 
-        if(receivedList[position].clickedAnswer != null)users.add(receivedList[position].clickedAnswer.toString())
+        if(receivedList[position].clickedAnswer != "")users.add(receivedList[position].clickedAnswer.toString())
 
         val questionAdapter by lazy{
             QuestionAdapter(
@@ -121,7 +153,7 @@ class QuizFragment : Fragment(), QuestionAdapter.Score {
             )
         }
 
-        //questionAdapter.differ.submitList(users)
+        questionAdapter.differ.submitList(users)
         binding.questionList.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = questionAdapter
@@ -129,6 +161,8 @@ class QuizFragment : Fragment(), QuestionAdapter.Score {
 
         questionAdapter.differ.submitList(users)
     }
+
+
 
     override fun amount(number: Int, clickedAnswer: String) {
         allScore += number
@@ -150,4 +184,7 @@ class QuizFragment : Fragment(), QuestionAdapter.Score {
             .commit()
     }
 
+    private fun showError(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
 }

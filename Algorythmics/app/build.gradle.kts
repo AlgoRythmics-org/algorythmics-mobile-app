@@ -75,6 +75,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("androidx.compose.ui:ui-android:1.6.1")
     implementation("androidx.compose.material3:material3-android:1.2.0")
+    implementation ("com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2")
 
     kapt("androidx.room:room-compiler:2.6.0")
 

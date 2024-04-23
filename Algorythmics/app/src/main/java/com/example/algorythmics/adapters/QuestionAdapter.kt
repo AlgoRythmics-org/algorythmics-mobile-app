@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
 import com.example.algorythmics.databinding.ViewholderQuestionBinding
 
-class QuestionAdapter (
+class QuestionAdapter(
     val correctAnswer: String,
     val users: MutableList<String> = mutableListOf(),
     var returnScore: Score
@@ -20,6 +20,7 @@ class QuestionAdapter (
     }
 
     private lateinit var binding: ViewholderQuestionBinding
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuestionAdapter.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -179,6 +180,7 @@ class QuestionAdapter (
     }
 
     val differ = AsyncListDiffer(this, differCallback)
+
 
 
 }
