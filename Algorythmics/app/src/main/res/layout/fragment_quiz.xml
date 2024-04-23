@@ -31,8 +31,6 @@
                     android:src="@drawable/back2" />
 
 
-
-
             </LinearLayout>
 
             <LinearLayout

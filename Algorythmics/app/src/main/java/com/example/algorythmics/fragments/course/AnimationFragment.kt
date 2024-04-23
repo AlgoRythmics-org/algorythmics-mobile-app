@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -53,6 +54,7 @@ class AnimationFragment : Fragment() {
     private lateinit var etSearchNumber: EditText
 
     private lateinit var tvAnimationSteps: TextView
+    private lateinit var backBtn3: ImageView
 
 
 
@@ -81,6 +83,8 @@ class AnimationFragment : Fragment() {
 
         tvAnimationSteps = view.findViewById(R.id.tv_scrollable)
 
+        backBtn3 = view.findViewById(R.id.backBtn3)
+
        // val bubbleSort = BubbleSort()
 
 
@@ -94,6 +98,12 @@ class AnimationFragment : Fragment() {
             "653d36ecce1b18cbd8bd14b4" -> mergeSortAdapter
             else -> sortedListAdapter
         }
+
+        // backBtn3 gomb eseménykezelője
+        backBtn3.setOnClickListener {
+            requireActivity().onBackPressed()
+        }
+
 
 
 

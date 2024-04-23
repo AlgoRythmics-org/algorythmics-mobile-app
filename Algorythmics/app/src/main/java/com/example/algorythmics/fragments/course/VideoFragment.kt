@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.example.algorythmics.R
 import com.example.algorythmics.databinding.FragmentVideoBinding
 import com.example.algorythmics.retrofit.models.VideoModel
 import com.example.algorythmics.retrofit.repositories.VideoRepository
@@ -26,6 +28,7 @@ class VideoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentVideoBinding.inflate(inflater, container, false)
+
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         return binding.root
     }
@@ -33,6 +36,9 @@ class VideoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.apply {
+            backBtn2.setOnClickListener { requireActivity().onBackPressed() }
+        }
         lifecycleScope.launch {
             try {
                 val videos: List<VideoModel> = videoRepository.getAllVideo()

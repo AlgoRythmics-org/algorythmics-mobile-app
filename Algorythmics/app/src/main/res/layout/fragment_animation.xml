@@ -7,6 +7,14 @@
     android:orientation="vertical"
     android:paddingTop="50dp">
 
+    <ImageView
+        android:id="@+id/backBtn3"
+        android:layout_width="72dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="0dp"
+        android:padding="8dp"
+        android:src="@drawable/back2" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_container"
         android:layout_width="match_parent"

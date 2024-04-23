@@ -40,6 +40,10 @@ class CodeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.apply {
+            backBtn4.setOnClickListener { requireActivity().onBackPressed() }
+        }
+
 
         val sentenceAdapter = SentenceAdapter()
         val wordsAdapter = WordsAdapter {
