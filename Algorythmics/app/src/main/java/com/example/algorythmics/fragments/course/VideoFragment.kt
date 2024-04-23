@@ -1,5 +1,6 @@
 package com.example.algorythmics.fragments.course
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,6 +26,7 @@ class VideoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentVideoBinding.inflate(inflater, container, false)
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         return binding.root
     }
 
@@ -45,6 +47,11 @@ class VideoFragment : Fragment() {
                 showError("Error loading videos: ${e.message}")
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
     private fun loadVideo(video: VideoModel) {
