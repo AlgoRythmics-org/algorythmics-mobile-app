@@ -1,6 +1,7 @@
 package com.example.algorythmics.retrofit
 
 import com.example.algorythmics.retrofit.models.AlgorithmModel
+import com.example.algorythmics.retrofit.models.CodeModel
 import com.example.algorythmics.retrofit.models.QuizModel
 import com.example.algorythmics.retrofit.models.VideoModel
 import retrofit2.http.GET
@@ -10,6 +11,8 @@ data class AlgorithmResponse(val algorithms: List<AlgorithmModel>)
 data class VideoResponse(val videos: List<VideoModel>)
 
 data class QuizResponse(val quiz: List<QuizModel>)
+
+data class CodeResponse(val code: List<CodeModel>)
 
 interface ApiService {
 
@@ -30,4 +33,7 @@ interface ApiService {
 
     @GET("api/quiz/{algorithmId}")
     fun getQuizByAlgorithmId(@Path("algorithmId") algorithmId : String) :QuizModel
+
+    @GET("api/code/allCode")
+    suspend fun getAllCode() : CodeResponse
 }
