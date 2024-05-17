@@ -6,6 +6,7 @@ import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -21,6 +22,7 @@ import kotlinx.coroutines.withContext
 
 class CodeFragment : Fragment() {
 
+
     private lateinit var codeRepository: CodeRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,13 +34,14 @@ class CodeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val linearLayout = LinearLayout(context).apply {
+        val mainLinearLayout = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = android.view.Gravity.CENTER_VERTICAL // Vertikális középre igazítás
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
-            )
+            ).apply {
+                setMargins(0, 300, 0, 0) // Az egész tartalom lejjebb kezdődik
+            }
         }
 
         lifecycleScope.launch {
@@ -47,25 +50,50 @@ class CodeFragment : Fragment() {
                 val algorithmId = arguments?.getString("algorithmId")
                 val code = codeList.find { it.algorithmId == algorithmId }
                 code?.let {
-                    val textView = TextView(context).apply {
-                        text = it.algorithmCode // Állítsd be a TextView szövegét az adatbázisból kapott szövegre
-                        textSize = 18f
-                        layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                        ).apply {
-                            gravity = android.view.Gravity.CENTER // Középre igazítás a szülőben
-                            setMargins(0, 50, 0, 0) // Példa a margók hozzáadására a TextView-hoz
+                    val codeText = it.algorithmCode
+                    val lines = codeText.split("\n")
+                    for (line in lines) {
+                        val lineLayout = LinearLayout(context).apply {
+                            orientation = LinearLayout.HORIZONTAL
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            )
                         }
+
+                        val parts = line.split("?")
+                        for (i in parts.indices) {
+                            if (i > 0) {
+                                val editText = EditText(context).apply {
+                                    setText("")
+                                    minWidth = 50  // Explicit minWidth beállítása pixelben
+                                    layoutParams = LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT
+                                    )
+                                }
+                                lineLayout.addView(editText)
+                            }
+
+                            val textView = TextView(context).apply {
+                                text = parts[i]
+                                layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                            }
+                            lineLayout.addView(textView)
+                        }
+
+                        mainLinearLayout.addView(lineLayout)
                     }
-                    linearLayout.addView(textView)
                 } ?: showError("No code found for this algorithm")
             } else {
                 showError("No codes found")
             }
         }
 
-        return linearLayout
+        return mainLinearLayout
     }
 
     private suspend fun getCodeFromRepository(): List<CodeModel> {
@@ -75,7 +103,6 @@ class CodeFragment : Fragment() {
     }
 
     private fun showError(message: String) {
-        // Hibakezelő metódus
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 }
