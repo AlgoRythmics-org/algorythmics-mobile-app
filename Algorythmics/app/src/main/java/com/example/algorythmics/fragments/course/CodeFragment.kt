@@ -1,72 +1,81 @@
 package com.example.algorythmics.fragments.course
 
+import android.content.ClipData
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.style.ClickableSpan
-import androidx.fragment.app.Fragment
+import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.algorythmics.R
-import com.example.algorythmics.adapters.SentenceAdapter
-import com.example.algorythmics.adapters.WordsAdapter
-import com.example.algorythmics.callback.DropListener
-import com.example.algorythmics.databinding.FragmentCodeBinding
-import com.google.android.flexbox.AlignItems
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
-
+import com.example.algorythmics.retrofit.models.CodeModel
+import com.example.algorythmics.retrofit.repositories.CodeRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CodeFragment : Fragment() {
-    private lateinit var binding: FragmentCodeBinding
-    private val words = mutableListOf("world", "a", "!", "What", "wonderful")
-    private var selectedWord = ""
+
+    private lateinit var codeRepository: CodeRepository
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        codeRepository = CodeRepository()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentCodeBinding.inflate(inflater, container, false)
+    ): View? {
+        val linearLayout = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = android.view.Gravity.CENTER_VERTICAL // Vertikális középre igazítás
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+        }
 
-        return binding.root
+        lifecycleScope.launch {
+            val codeList = getCodeFromRepository()
+            if (codeList.isNotEmpty()) {
+                val algorithmId = arguments?.getString("algorithmId")
+                val code = codeList.find { it.algorithmId == algorithmId }
+                code?.let {
+                    val textView = TextView(context).apply {
+                        text = it.algorithmCode // Állítsd be a TextView szövegét az adatbázisból kapott szövegre
+                        textSize = 18f
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        ).apply {
+                            gravity = android.view.Gravity.CENTER // Középre igazítás a szülőben
+                            setMargins(0, 50, 0, 0) // Példa a margók hozzáadására a TextView-hoz
+                        }
+                    }
+                    linearLayout.addView(textView)
+                } ?: showError("No code found for this algorithm")
+            } else {
+                showError("No codes found")
+            }
+        }
+
+        return linearLayout
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        binding.apply {
-            backBtn4.setOnClickListener { requireActivity().onBackPressed() }
+    private suspend fun getCodeFromRepository(): List<CodeModel> {
+        return withContext(Dispatchers.IO) {
+            codeRepository.getAllCode()
         }
+    }
 
-
-        val sentenceAdapter = SentenceAdapter()
-        val wordsAdapter = WordsAdapter {
-            selectedWord = it
-        }.apply {
-            submitList(words)
-        }
-
-        binding.rvSentence.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.rvSentence.adapter = sentenceAdapter
-
-        binding.rvSentence.setOnDragListener(
-            DropListener {
-                wordsAdapter.removeItem(selectedWord)
-                sentenceAdapter.addItem(selectedWord)
-            }
-        )
-
-        binding.rvWords.layoutManager = FlexboxLayoutManager(requireContext(), FlexDirection.ROW, FlexWrap.WRAP).apply {
-            justifyContent = JustifyContent.SPACE_EVENLY
-            alignItems = AlignItems.CENTER
-        }
-
-        binding.rvWords.adapter = wordsAdapter
+    private fun showError(message: String) {
+        // Hibakezelő metódus
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 }
