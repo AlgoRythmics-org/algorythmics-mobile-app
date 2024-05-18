@@ -87,16 +87,13 @@ class CodeFragment : Fragment() {
                         }
 
                         mainLinearLayout.addView(lineLayout)
-
-
                     }
-
 
                     // Adding answers below the code
                     val answersLayout = LinearLayout(context).apply {
-                        orientation = LinearLayout.HORIZONTAL
+                        orientation = LinearLayout.VERTICAL
                         layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         )
                     }
@@ -111,7 +108,7 @@ class CodeFragment : Fragment() {
                         )
                     }
 
-                    for (answer in answers) {
+                    answers.forEach { answer ->
                         val answerEditText = EditText(context).apply {
                             setText(answer)
                             isFocusable = false
@@ -131,13 +128,22 @@ class CodeFragment : Fragment() {
                             maxLines = 3 // Maximum sorok száma
                         }
 
-                        currentRow.addView(answerEditText)
+                        // Mérjük meg a válasz szélességét
+                        answerEditText.measure(
+                            View.MeasureSpec.UNSPECIFIED,
+                            View.MeasureSpec.UNSPECIFIED
+                        )
+                        val answerWidth = answerEditText.measuredWidth
 
-                        // Ha a sor túl hosszú, és már nincs elég hely egy új elem hozzáadásához, akkor csak a fennmaradó elemeket helyezzük az utolsó sorba
-                        if (currentRow.width > maxWidth && currentRow.childCount > 1) {
-                            val lastRow = answersLayout.getChildAt(answersLayout.childCount - 1) as LinearLayout
-                            lastRow.removeViewAt(lastRow.childCount - 1) // Távolítsa el az utolsó elemet az aktuális sorból
-                            answersLayout.addView(currentRow) // Adjuk hozzá az aktuális sort a fő elrendezéshez
+                        // Ha a válasz hozzáadása után a sor szélessége meghaladná a maxWidth értéket, kezdjünk új sort
+                        currentRow.measure(
+                            View.MeasureSpec.UNSPECIFIED,
+                            View.MeasureSpec.UNSPECIFIED
+                        )
+                        val currentRowWidth = currentRow.measuredWidth
+
+                        if (currentRowWidth + answerWidth > maxWidth) {
+                            answersLayout.addView(currentRow)
                             currentRow = LinearLayout(context).apply {
                                 orientation = LinearLayout.HORIZONTAL
                                 layoutParams = LinearLayout.LayoutParams(
@@ -145,11 +151,12 @@ class CodeFragment : Fragment() {
                                     LinearLayout.LayoutParams.WRAP_CONTENT
                                 )
                             }
-                            currentRow.addView(answerEditText) // Adjuk hozzá az elemet az új sorhoz
                         }
+
+                        currentRow.addView(answerEditText)
                     }
 
-                    // Hozzáadjuk a maradék sort a fő elrendezéshez
+                    // Hozzáadjuk az utolsó sort az elrendezéshez
                     answersLayout.addView(currentRow)
                     mainLinearLayout.addView(answersLayout)
                 } ?: showError("No code found for this algorithm")
@@ -158,7 +165,15 @@ class CodeFragment : Fragment() {
             }
         }
 
-        return mainLinearLayout
+        // Görgetőpanel hozzáadása a fő elrendezéshez
+        val scrollView = ScrollView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            addView(mainLinearLayout)
+        }
+        return scrollView
     }
 
     private suspend fun getCodeFromRepository(): List<CodeModel> {
@@ -170,5 +185,4 @@ class CodeFragment : Fragment() {
     private fun showError(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
-
 }
