@@ -126,6 +126,13 @@ class CodeFragment : Fragment() {
                             gravity = Gravity.CENTER // Szöveg középre igazítása
                             minWidth = 100 // Minimum szélesség beállítása
                             maxLines = 3 // Maximum sorok száma
+                            setOnClickListener {
+                                val firstEmptyEditText = findFirstEmptyEditText(mainLinearLayout)
+                                firstEmptyEditText?.let { editText ->
+                                    editText.setText(answer)
+                                    (this.parent as? ViewGroup)?.removeView(this) // Eltávolítja a választ a szülő nézetből
+                                }
+                            }
                         }
 
                         // Mérjük meg a válasz szélességét
@@ -174,6 +181,21 @@ class CodeFragment : Fragment() {
             addView(mainLinearLayout)
         }
         return scrollView
+    }
+
+    private fun findFirstEmptyEditText(root: ViewGroup): EditText? {
+        for (i in 0 until root.childCount) {
+            val child = root.getChildAt(i)
+            if (child is ViewGroup) {
+                val found = findFirstEmptyEditText(child)
+                if (found != null) {
+                    return found
+                }
+            } else if (child is EditText && child.text.isEmpty()) {
+                return child
+            }
+        }
+        return null
     }
 
     private suspend fun getCodeFromRepository(): List<CodeModel> {
