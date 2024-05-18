@@ -2,6 +2,7 @@ package com.example.algorythmics.fragments.course
 
 import android.content.ClipData
 import android.os.Bundle
+import android.os.Looper
 import android.view.DragEvent
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -13,18 +14,22 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.algorythmics.R
 import com.example.algorythmics.retrofit.models.CodeModel
 import com.example.algorythmics.retrofit.repositories.CodeRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class CodeFragment : Fragment() {
 
     private lateinit var codeRepository: CodeRepository
+    private lateinit var correctAnswers: List<String>
+    private lateinit var answersLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +47,7 @@ class CodeFragment : Fragment() {
                 LinearLayout.LayoutParams.MATCH_PARENT
             ).apply {
                 setMargins(0, 300, 0, 0) // Az egész tartalom lejjebb kezdődik
+                //setBackgroundColor(ContextCompat.getColor(context, R.color.pale_blue))
             }
         }
 
@@ -51,6 +57,8 @@ class CodeFragment : Fragment() {
                 val algorithmId = arguments?.getString("algorithmId")
                 val code = codeList.find { it.algorithmId == algorithmId }
                 code?.let {
+                    correctAnswers = it.correctAnswers.split("\n") // Helyes válaszok listája
+
                     val codeText = it.algorithmCode
                     val lines = codeText.split("\n")
                     for (line in lines) {
@@ -90,7 +98,7 @@ class CodeFragment : Fragment() {
                     }
 
                     // Adding answers below the code
-                    val answersLayout = LinearLayout(context).apply {
+                    answersLayout = LinearLayout(context).apply {
                         orientation = LinearLayout.VERTICAL
                         layoutParams = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -127,11 +135,7 @@ class CodeFragment : Fragment() {
                             minWidth = 100 // Minimum szélesség beállítása
                             maxLines = 3 // Maximum sorok száma
                             setOnClickListener {
-                                val firstEmptyEditText = findFirstEmptyEditText(mainLinearLayout)
-                                firstEmptyEditText?.let { editText ->
-                                    editText.setText(answer)
-                                    (this.parent as? ViewGroup)?.removeView(this) // Eltávolítja a választ a szülő nézetből
-                                }
+                                handleAnswerClick(this, answer)
                             }
                         }
 
@@ -183,6 +187,32 @@ class CodeFragment : Fragment() {
         return scrollView
     }
 
+    private fun handleAnswerClick(answerEditText: EditText, answer: String) {
+        val firstEmptyEditText = findFirstEmptyEditText(view as ViewGroup)
+        firstEmptyEditText?.let { editText ->
+            val index = findEditTextIndex(view as ViewGroup, editText)
+            editText.setText(answer)
+            (answerEditText.parent as? ViewGroup)?.removeView(answerEditText)
+
+            if (index != null && index < correctAnswers.size && correctAnswers[index] == answer) {
+                // Helyes válasz
+                //Toast.makeText(context, "Correct answer", Toast.LENGTH_SHORT).show()
+            } else {
+                // Helytelen válasz, késleltetés után visszaállítás
+                lifecycleScope.launch {
+                    delay(200) // 1 másodperces késleltetés
+                    editText.setText("")
+                    addAnswerBack(answerEditText)
+                }
+            }
+        }
+    }
+
+    private fun addAnswerBack(answerEditText: EditText) {
+        val currentRow = answersLayout.getChildAt(answersLayout.childCount - 1) as LinearLayout
+        currentRow.addView(answerEditText)
+    }
+
     private fun findFirstEmptyEditText(root: ViewGroup): EditText? {
         for (i in 0 until root.childCount) {
             val child = root.getChildAt(i)
@@ -196,6 +226,39 @@ class CodeFragment : Fragment() {
             }
         }
         return null
+    }
+
+    private fun findEditTextIndex(root: ViewGroup, editText: EditText): Int? {
+        var index = 0
+        for (i in 0 until root.childCount) {
+            val child = root.getChildAt(i)
+            if (child is ViewGroup) {
+                val foundIndex = findEditTextIndex(child, editText)
+                if (foundIndex != null) {
+                    return index + foundIndex
+                }
+                index += countEditTexts(child)
+            } else if (child is EditText) {
+                if (child == editText) {
+                    return index
+                }
+                index++
+            }
+        }
+        return null
+    }
+
+    private fun countEditTexts(root: ViewGroup): Int {
+        var count = 0
+        for (i in 0 until root.childCount) {
+            val child = root.getChildAt(i)
+            if (child is ViewGroup) {
+                count += countEditTexts(child)
+            } else if (child is EditText) {
+                count++
+            }
+        }
+        return count
     }
 
     private suspend fun getCodeFromRepository(): List<CodeModel> {

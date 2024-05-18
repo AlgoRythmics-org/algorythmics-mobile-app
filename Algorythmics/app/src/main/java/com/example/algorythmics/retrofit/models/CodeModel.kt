@@ -10,5 +10,7 @@ data class CodeModel(
     @SerializedName("algorithm_id")
     val algorithmId: String,
     @SerializedName("answers")
-    val answers: String
+    val answers: String,
+    @SerializedName("correct_answers")
+    val correctAnswers: String,
 )
