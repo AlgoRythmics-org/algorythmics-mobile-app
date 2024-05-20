@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -17,6 +18,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.algorythmics.R
 import com.example.algorythmics.retrofit.models.CodeModel
 import com.example.algorythmics.retrofit.repositories.CodeRepository
@@ -26,7 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class CodeFragment : Fragment() {
-
     private lateinit var codeRepository: CodeRepository
     private lateinit var correctAnswers: List<String>
     private lateinit var answersLayout: LinearLayout
@@ -40,6 +41,28 @@ class CodeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        val rootView = inflater.inflate(R.layout.fragment_code, container, false)
+
+        // Adding ImageView to the top of the screen
+        val backBtn = ImageView(context).apply {
+            id = View.generateViewId()
+            setImageResource(R.drawable.back2)
+            layoutParams = FrameLayout.LayoutParams(
+                40.dpToPx(),
+                40.dpToPx()
+            ).apply {
+                gravity = Gravity.START or Gravity.TOP // Top-left alignment
+                setMargins(16.dpToPx(), 16.dpToPx(), 0, 0) // Margins from top and left
+            }
+            setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx()) // Padding
+            // Add click listener to navigate back
+            setOnClickListener {
+                findNavController().navigateUp() // Navigate up one level
+            }
+        }
+        (rootView as ViewGroup).addView(backBtn)
+
         val mainLinearLayout = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
@@ -47,7 +70,6 @@ class CodeFragment : Fragment() {
                 LinearLayout.LayoutParams.MATCH_PARENT
             ).apply {
                 setMargins(0, 300, 0, 0) // Az egész tartalom lejjebb kezdődik
-                //setBackgroundColor(ContextCompat.getColor(context, R.color.pale_blue))
             }
         }
 
@@ -61,6 +83,21 @@ class CodeFragment : Fragment() {
 
                     val codeText = it.algorithmCode
                     val lines = codeText.split("\n")
+
+                    val codeContainer = LinearLayout(context).apply {
+                        orientation = LinearLayout.VERTICAL
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        ).apply {
+                            setMargins(16, 16, 16, 16) // Margins beállítása a fehér doboz körül
+                            setPadding(16, 16, 16, 16) // Padding beállítása a fehér dobozban
+                            setBackgroundColor(ContextCompat.getColor(context, android.R.color.white)) // Fehér háttér
+                            setBackgroundResource(R.drawable.bg_word) // Alternatív háttér beállítása, ha van drawable resource
+                        }
+                        elevation = 8f // Emelkedés beállítása
+                    }
+
                     for (line in lines) {
                         val lineLayout = LinearLayout(context).apply {
                             orientation = LinearLayout.HORIZONTAL
@@ -94,8 +131,10 @@ class CodeFragment : Fragment() {
                             lineLayout.addView(textView)
                         }
 
-                        mainLinearLayout.addView(lineLayout)
+                        codeContainer.addView(lineLayout)
                     }
+
+                    mainLinearLayout.addView(codeContainer)
 
                     // Adding answers below the code
                     answersLayout = LinearLayout(context).apply {
@@ -103,7 +142,9 @@ class CodeFragment : Fragment() {
                         layoutParams = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
-                        )
+                        ).apply {
+                            setMargins(0, 100, 0, 0) // Növelje a marginTop értékét, hogy több helyet hagyjon
+                        }
                     }
 
                     val answers = it.answers.split("\n")
@@ -119,13 +160,14 @@ class CodeFragment : Fragment() {
                     answers.forEach { answer ->
                         val answerEditText = EditText(context).apply {
                             setText(answer)
+                            textSize = 14f
                             isFocusable = false
                             isFocusableInTouchMode = false
                             layoutParams = LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.WRAP_CONTENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT
                             ).apply {
-                                setMargins(0, 10, 10, 10) // Margins beállítása az egyes válaszok között
+                                setMargins(10, 20, 10, 20) // Margins beállítása az egyes válaszok között
                             }
                             setBackgroundResource(R.drawable.bg_word) // Háttér beállítása
                             elevation = 4f // Emelkedés beállítása
@@ -182,10 +224,13 @@ class CodeFragment : Fragment() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+            setBackgroundColor(ContextCompat.getColor(context, R.color.pale_blue)) // Beállítja a háttérszínt
             addView(mainLinearLayout)
         }
         return scrollView
     }
+
+
 
     private fun handleAnswerClick(answerEditText: EditText, answer: String) {
         val firstEmptyEditText = findFirstEmptyEditText(view as ViewGroup)
@@ -197,6 +242,7 @@ class CodeFragment : Fragment() {
             if (index != null && index < correctAnswers.size && correctAnswers[index] == answer) {
                 // Helyes válasz
                 //Toast.makeText(context, "Correct answer", Toast.LENGTH_SHORT).show()
+                answerEditText.textSize = 12f
             } else {
                 // Helytelen válasz, késleltetés után visszaállítás
                 lifecycleScope.launch {
@@ -269,5 +315,10 @@ class CodeFragment : Fragment() {
 
     private fun showError(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+    }
+
+    // Extension function to convert dp to pixels
+    private fun Int.dpToPx(): Int {
+        return (this * resources.displayMetrics.density).toInt()
     }
 }
