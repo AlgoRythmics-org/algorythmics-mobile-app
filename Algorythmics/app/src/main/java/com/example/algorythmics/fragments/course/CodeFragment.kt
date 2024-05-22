@@ -33,7 +33,7 @@ class CodeFragment : Fragment() {
     private lateinit var codeRepository: CodeRepository
     private lateinit var correctAnswers: List<String>
     private lateinit var answersLayout: LinearLayout
-    private var submitButton: AlertDialog? = null
+    private lateinit var submitButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +83,14 @@ class CodeFragment : Fragment() {
 
                     val codeText = it.algorithmCode
                     val lines = codeText.split("\n")
+
+                    // Create a ScrollView to make the code container scrollable
+                    val codeScrollView = ScrollView(context).apply {
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            350.dpToPx() // Set the fixed height
+                        )
+                    }
 
                     val codeContainer = LinearLayout(context).apply {
                         orientation = LinearLayout.VERTICAL
@@ -135,7 +143,8 @@ class CodeFragment : Fragment() {
                         codeContainer.addView(lineLayout)
                     }
 
-                    mainLinearLayout.addView(codeContainer)
+                    codeScrollView.addView(codeContainer)
+                    mainLinearLayout.addView(codeScrollView)
 
                     answersLayout = LinearLayout(context).apply {
                         orientation = LinearLayout.VERTICAL
@@ -169,7 +178,7 @@ class CodeFragment : Fragment() {
                             ).apply {
                                 setMargins(10, 20, 10, 20)
                             }
-                            setBackgroundResource(R.drawable.bg_word)
+                            setBackgroundColor(ContextCompat.getColor(context, R.color.colorGradEnd)) // Set background color to orange
                             elevation = 4f
                             setPadding(12, 12, 12, 12)
                             setTextColor(resources.getColor(android.R.color.black))
@@ -209,6 +218,25 @@ class CodeFragment : Fragment() {
 
                     answersLayout.addView(currentRow)
                     mainLinearLayout.addView(answersLayout)
+
+                    // Add submit button below the answers list
+                    submitButton = Button(context).apply {
+                        text = "Submit"
+                        textSize = 16f
+                        setBackgroundColor(ContextCompat.getColor(context, R.color.blue))
+                        isEnabled = false
+                        setOnClickListener {
+                            checkAnswers()
+                        }
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        ).apply {
+                            gravity = Gravity.CENTER
+                            setMargins(0, 40, 0, 40)
+                        }
+                    }
+                    mainLinearLayout.addView(submitButton)
                 } ?: showError("No code found for this algorithm")
             } else {
                 showError("No codes found")
@@ -233,28 +261,10 @@ class CodeFragment : Fragment() {
             (answerEditText.parent as? ViewGroup)?.removeView(answerEditText)
             answerEditText.textSize = 12f
 
-            if (areAllEditTextsFilled(view as ViewGroup)) {
-                showSubmitButton()
-            }
+            // Enable submit button when all edit texts are filled
+            submitButton.isEnabled = areAllEditTextsFilled(view as ViewGroup)
         }
     }
-
-    private fun showSubmitButton() {
-        val builder = AlertDialog.Builder(context)
-        val dialogView = layoutInflater.inflate(R.layout.dialog_submit, null)
-        builder.setView(dialogView)
-
-        val dialog = builder.create()
-
-        val submitButton = dialogView.findViewById<Button>(R.id.submit_button)
-        submitButton.setOnClickListener {
-            checkAnswers()
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
 
     private fun checkAnswers() {
         val root = view as ViewGroup
