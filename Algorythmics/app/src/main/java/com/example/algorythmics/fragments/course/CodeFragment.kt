@@ -34,6 +34,9 @@ class CodeFragment : Fragment() {
     private lateinit var correctAnswers: List<String>
     private lateinit var answersLayout: LinearLayout
     private lateinit var submitButton: Button
+    private lateinit var tryAgainButton: Button
+    private lateinit var availableAnswers: MutableList<String>
+    private val usedAnswers = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -156,7 +159,7 @@ class CodeFragment : Fragment() {
                         }
                     }
 
-                    val answers = it.answers.split("\n")
+                    availableAnswers = it.answers.split("\n").toMutableList()
                     val maxWidth = resources.displayMetrics.widthPixels
                     var currentRow = LinearLayout(context).apply {
                         orientation = LinearLayout.HORIZONTAL
@@ -166,30 +169,8 @@ class CodeFragment : Fragment() {
                         )
                     }
 
-                    answers.forEach { answer ->
-                        val answerEditText = EditText(context).apply {
-                            setText(answer)
-                            textSize = 14f
-                            isFocusable = false
-                            isFocusableInTouchMode = false
-                            layoutParams = LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT
-                            ).apply {
-                                setMargins(10, 20, 10, 20)
-                            }
-                            setBackgroundColor(ContextCompat.getColor(context, R.color.colorGradEnd)) // Set background color to orange
-                            elevation = 4f
-                            setPadding(12, 12, 12, 12)
-                            setTextColor(resources.getColor(android.R.color.black))
-                            gravity = Gravity.CENTER
-                            minWidth = 100
-                            maxLines = 3
-                            setOnClickListener {
-                                handleAnswerClick(this, answer)
-                            }
-                        }
-
+                    availableAnswers.forEach { answer ->
+                        val answerEditText = createAnswerEditText(answer)
                         answerEditText.measure(
                             View.MeasureSpec.UNSPECIFIED,
                             View.MeasureSpec.UNSPECIFIED
@@ -237,6 +218,25 @@ class CodeFragment : Fragment() {
                         }
                     }
                     mainLinearLayout.addView(submitButton)
+
+                    // Add try again button
+                    tryAgainButton = Button(context).apply {
+                        text = "Try Again"
+                        textSize = 16f
+                        setBackgroundColor(ContextCompat.getColor(context, R.color.red))
+                        visibility = View.GONE
+                        setOnClickListener {
+                            retryIncorrectAnswers()
+                        }
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        ).apply {
+                            gravity = Gravity.CENTER
+                            setMargins(0, 40, 0, 40)
+                        }
+                    }
+                    mainLinearLayout.addView(tryAgainButton)
                 } ?: showError("No code found for this algorithm")
             } else {
                 showError("No codes found")
@@ -254,12 +254,40 @@ class CodeFragment : Fragment() {
         return scrollView
     }
 
+    private fun createAnswerEditText(answer: String): EditText {
+        return EditText(context).apply {
+            setText(answer)
+            textSize = 14f
+            isFocusable = false
+            isFocusableInTouchMode = false
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(10, 20, 10, 20)
+            }
+            setBackgroundColor(ContextCompat.getColor(context, R.color.colorGradEnd)) // Set background color to orange
+            elevation = 4f
+            setPadding(12, 12, 12, 12)
+            setTextColor(resources.getColor(android.R.color.black))
+            gravity = Gravity.CENTER
+            minWidth = 100
+            maxLines = 3
+            setOnClickListener {
+                handleAnswerClick(this, answer)
+            }
+        }
+    }
+
     private fun handleAnswerClick(answerEditText: EditText, answer: String) {
         val firstEmptyEditText = findFirstEmptyEditText(view as ViewGroup)
         firstEmptyEditText?.let { editText ->
             editText.setText(answer)
             (answerEditText.parent as? ViewGroup)?.removeView(answerEditText)
             answerEditText.textSize = 12f
+
+            usedAnswers.add(answer)
+            availableAnswers.remove(answer)
 
             // Enable submit button when all edit texts are filled
             submitButton.isEnabled = areAllEditTextsFilled(view as ViewGroup)
@@ -269,21 +297,35 @@ class CodeFragment : Fragment() {
     private fun checkAnswers() {
         val root = view as ViewGroup
         var editTextIndex = 0
+        var allCorrect = true
 
         for (i in 0 until root.childCount) {
             val child = root.getChildAt(i)
             if (child is ViewGroup) {
-                editTextIndex = checkAnswersInViewGroup(child, editTextIndex)
+                editTextIndex = checkAnswersInViewGroup(child, editTextIndex).also {
+                    if (it.second) allCorrect = false
+                }.first
             }
+        }
+
+        if (allCorrect) {
+            Toast.makeText(context, "All answers are correct!", Toast.LENGTH_LONG).show()
+        } else {
+            submitButton.visibility = View.GONE
+            tryAgainButton.visibility = View.VISIBLE
         }
     }
 
-    private fun checkAnswersInViewGroup(root: ViewGroup, index: Int): Int {
+    private fun checkAnswersInViewGroup(root: ViewGroup, index: Int): Pair<Int, Boolean> {
         var currentIndex = index
+        var incorrect = false
         for (i in 0 until root.childCount) {
             val child = root.getChildAt(i)
             if (child is ViewGroup) {
-                currentIndex = checkAnswersInViewGroup(child, currentIndex)
+                checkAnswersInViewGroup(child, currentIndex).also {
+                    currentIndex = it.first
+                    if (it.second) incorrect = true
+                }
             } else if (child is EditText && child.tag == "codeEditText") {
                 val userAnswer = child.text.toString()
                 val correctAnswer = correctAnswers.getOrNull(currentIndex)
@@ -292,6 +334,50 @@ class CodeFragment : Fragment() {
                     child.setBackgroundResource(R.drawable.green_background)
                 } else {
                     child.setBackgroundResource(R.drawable.red_background)
+                    incorrect = true
+                }
+                currentIndex++
+            }
+        }
+        return Pair(currentIndex, incorrect)
+    }
+
+    private fun retryIncorrectAnswers() {
+        val root = view as ViewGroup
+        var editTextIndex = 0
+        val incorrectAnswers = mutableListOf<String>()
+
+        for (i in 0 until root.childCount) {
+            val child = root.getChildAt(i)
+            if (child is ViewGroup) {
+                editTextIndex = retryIncorrectAnswersInViewGroup(child, editTextIndex, incorrectAnswers)
+            }
+        }
+
+        availableAnswers.addAll(incorrectAnswers)
+        updateAvailableAnswersLayout()
+
+        submitButton.visibility = View.VISIBLE
+        tryAgainButton.visibility = View.GONE
+    }
+
+    private fun retryIncorrectAnswersInViewGroup(root: ViewGroup, index: Int, incorrectAnswers: MutableList<String>): Int {
+        var currentIndex = index
+        for (i in 0 until root.childCount) {
+            val child = root.getChildAt(i)
+            if (child is ViewGroup) {
+                currentIndex = retryIncorrectAnswersInViewGroup(child, currentIndex, incorrectAnswers)
+            } else if (child is EditText && child.tag == "codeEditText") {
+                val userAnswer = child.text.toString()
+                val correctAnswer = correctAnswers.getOrNull(currentIndex)
+
+                if (correctAnswer == null || userAnswer != correctAnswer) {
+                    incorrectAnswers.add(userAnswer)
+                    child.setText("")
+                    child.setBackgroundResource(0)
+                } else {
+                    // Add correct answers to used answers
+                    usedAnswers.add(userAnswer)
                 }
                 currentIndex++
             }
@@ -299,9 +385,46 @@ class CodeFragment : Fragment() {
         return currentIndex
     }
 
-    private fun addAnswerBack(answerEditText: EditText) {
-        val currentRow = answersLayout.getChildAt(answersLayout.childCount - 1) as LinearLayout
-        currentRow.addView(answerEditText)
+    private fun updateAvailableAnswersLayout() {
+        answersLayout.removeAllViews()
+        val maxWidth = resources.displayMetrics.widthPixels
+        var currentRow = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        availableAnswers.forEach { answer ->
+            val answerEditText = createAnswerEditText(answer)
+            answerEditText.measure(
+                View.MeasureSpec.UNSPECIFIED,
+                View.MeasureSpec.UNSPECIFIED
+            )
+            val answerWidth = answerEditText.measuredWidth
+
+            currentRow.measure(
+                View.MeasureSpec.UNSPECIFIED,
+                View.MeasureSpec.UNSPECIFIED
+            )
+            val currentRowWidth = currentRow.measuredWidth
+
+            if (currentRowWidth + answerWidth > maxWidth) {
+                answersLayout.addView(currentRow)
+                currentRow = LinearLayout(context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                }
+            }
+
+            currentRow.addView(answerEditText)
+        }
+
+        answersLayout.addView(currentRow)
     }
 
     private fun findFirstEmptyEditText(root: ViewGroup): EditText? {
@@ -346,4 +469,5 @@ class CodeFragment : Fragment() {
     private fun Int.dpToPx(): Int {
         return (this * resources.displayMetrics.density).toInt()
     }
+
 }
