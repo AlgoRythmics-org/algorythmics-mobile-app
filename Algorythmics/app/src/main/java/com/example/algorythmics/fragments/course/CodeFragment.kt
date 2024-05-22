@@ -241,13 +241,20 @@ class CodeFragment : Fragment() {
 
     private fun showSubmitButton() {
         val builder = AlertDialog.Builder(context)
-        builder.setPositiveButton("Submit") { dialog, _ ->
+        val dialogView = layoutInflater.inflate(R.layout.dialog_submit, null)
+        builder.setView(dialogView)
+
+        val dialog = builder.create()
+
+        val submitButton = dialogView.findViewById<Button>(R.id.submit_button)
+        submitButton.setOnClickListener {
             checkAnswers()
             dialog.dismiss()
         }
-        submitButton = builder.create()
-        submitButton?.show()
+
+        dialog.show()
     }
+
 
     private fun checkAnswers() {
         val root = view as ViewGroup
