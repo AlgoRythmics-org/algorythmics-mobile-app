@@ -223,7 +223,7 @@ class CodeFragment : Fragment() {
                     tryAgainButton = Button(context).apply {
                         text = "Try Again"
                         textSize = 16f
-                        setBackgroundColor(ContextCompat.getColor(context, R.color.red))
+                        setBackgroundColor(ContextCompat.getColor(context, R.color.grey))
                         visibility = View.GONE
                         setOnClickListener {
                             retryIncorrectAnswers()
@@ -309,7 +309,7 @@ class CodeFragment : Fragment() {
         }
 
         if (allCorrect) {
-            Toast.makeText(context, "All answers are correct!", Toast.LENGTH_LONG).show()
+            //Toast.makeText(context, "All answers are correct!", Toast.LENGTH_LONG).show()
         } else {
             submitButton.visibility = View.GONE
             tryAgainButton.visibility = View.VISIBLE
@@ -357,6 +357,7 @@ class CodeFragment : Fragment() {
         availableAnswers.addAll(incorrectAnswers)
         updateAvailableAnswersLayout()
 
+        submitButton.isEnabled = areAllEditTextsFilled(view as ViewGroup)
         submitButton.visibility = View.VISIBLE
         tryAgainButton.visibility = View.GONE
     }
