@@ -47,7 +47,7 @@ class CodeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val rootView = inflater.inflate(R.layout.fragment_code, container, false)
+        val rootView = FrameLayout(requireContext())
 
         val backBtn = ImageView(context).apply {
             id = View.generateViewId()
@@ -60,11 +60,9 @@ class CodeFragment : Fragment() {
                 setMargins(16.dpToPx(), 16.dpToPx(), 0, 0)
             }
             setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
-            setOnClickListener {
-                findNavController().navigateUp()
-            }
+            setOnClickListener { requireActivity().onBackPressed() }
+
         }
-        (rootView as ViewGroup).addView(backBtn)
 
         val mainLinearLayout = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -87,11 +85,10 @@ class CodeFragment : Fragment() {
                     val codeText = it.algorithmCode
                     val lines = codeText.split("\n")
 
-                    // Create a ScrollView to make the code container scrollable
                     val codeScrollView = ScrollView(context).apply {
                         layoutParams = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
-                            350.dpToPx() // Set the fixed height
+                            350.dpToPx()
                         )
                     }
 
@@ -200,40 +197,42 @@ class CodeFragment : Fragment() {
                     answersLayout.addView(currentRow)
                     mainLinearLayout.addView(answersLayout)
 
-                    // Add submit button below the answers list
                     submitButton = Button(context).apply {
                         text = "Submit"
                         textSize = 16f
                         setBackgroundColor(ContextCompat.getColor(context, R.color.blue))
+                        setTextColor(ContextCompat.getColor(context, android.R.color.white))
+                        background = ContextCompat.getDrawable(context, R.drawable.rounded_button)
                         isEnabled = false
                         setOnClickListener {
                             checkAnswers()
                         }
                         layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         ).apply {
                             gravity = Gravity.CENTER
-                            setMargins(0, 40, 0, 40)
+                            setMargins(16.dpToPx(), 40.dpToPx(), 16.dpToPx(), 0)
                         }
                     }
                     mainLinearLayout.addView(submitButton)
 
-                    // Add try again button
                     tryAgainButton = Button(context).apply {
                         text = "Try Again"
                         textSize = 16f
                         setBackgroundColor(ContextCompat.getColor(context, R.color.grey))
+                        setTextColor(ContextCompat.getColor(context, android.R.color.white))
+                        background = ContextCompat.getDrawable(context, R.drawable.rounded_button)
                         visibility = View.GONE
                         setOnClickListener {
                             retryIncorrectAnswers()
                         }
                         layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         ).apply {
                             gravity = Gravity.CENTER
-                            setMargins(0, 40, 0, 40)
+                            setMargins(16.dpToPx(), 40.dpToPx(), 16.dpToPx(), 40.dpToPx())
                         }
                     }
                     mainLinearLayout.addView(tryAgainButton)
@@ -251,7 +250,10 @@ class CodeFragment : Fragment() {
             setBackgroundColor(ContextCompat.getColor(context, R.color.pale_blue))
             addView(mainLinearLayout)
         }
-        return scrollView
+        rootView.addView(scrollView)
+        rootView.addView(backBtn)  // Add backBtn last to ensure it's on top
+
+        return rootView
     }
 
     private fun createAnswerEditText(answer: String): EditText {
@@ -266,7 +268,7 @@ class CodeFragment : Fragment() {
             ).apply {
                 setMargins(10, 20, 10, 20)
             }
-            setBackgroundColor(ContextCompat.getColor(context, R.color.colorGradEnd)) // Set background color to orange
+            setBackgroundColor(ContextCompat.getColor(context, R.color.colorGradEnd))
             elevation = 4f
             setPadding(12, 12, 12, 12)
             setTextColor(resources.getColor(android.R.color.black))
@@ -289,7 +291,6 @@ class CodeFragment : Fragment() {
             usedAnswers.add(answer)
             availableAnswers.remove(answer)
 
-            // Enable submit button when all edit texts are filled
             submitButton.isEnabled = areAllEditTextsFilled(view as ViewGroup)
         }
     }
@@ -299,22 +300,39 @@ class CodeFragment : Fragment() {
         var editTextIndex = 0
         var allCorrect = true
 
+        if (!areAllEditTextsFilled(root)) {
+            // Ha nincsenek minden mező ki töltve, akkor megjelenítünk egy toast üzenetet
+            showToast("Please fill in all fields")
+            return
+        }
+
+
         for (i in 0 until root.childCount) {
             val child = root.getChildAt(i)
             if (child is ViewGroup) {
-                editTextIndex = checkAnswersInViewGroup(child, editTextIndex).also {
-                    if (it.second) allCorrect = false
-                }.first
+                val result = checkAnswersInViewGroup(child, editTextIndex)
+                editTextIndex = result.first
+                if (result.second) {
+                    allCorrect = false
+                }
             }
         }
 
         if (allCorrect) {
-            //Toast.makeText(context, "All answers are correct!", Toast.LENGTH_LONG).show()
+            // Ha minden válasz helyes, a submitButton helyett megjelenítjük a tryAgainButton-t
+            submitButton.visibility = View.VISIBLE
+            tryAgainButton.visibility = View.GONE
         } else {
+            // Ha van helytelen válasz, a submitButton marad
             submitButton.visibility = View.GONE
             tryAgainButton.visibility = View.VISIBLE
         }
     }
+
+    private fun showToast(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
 
     private fun checkAnswersInViewGroup(root: ViewGroup, index: Int): Pair<Int, Boolean> {
         var currentIndex = index
@@ -377,7 +395,6 @@ class CodeFragment : Fragment() {
                     child.setText("")
                     child.setBackgroundResource(0)
                 } else {
-                    // Add correct answers to used answers
                     usedAnswers.add(userAnswer)
                 }
                 currentIndex++
@@ -470,5 +487,4 @@ class CodeFragment : Fragment() {
     private fun Int.dpToPx(): Int {
         return (this * resources.displayMetrics.density).toInt()
     }
-
 }
