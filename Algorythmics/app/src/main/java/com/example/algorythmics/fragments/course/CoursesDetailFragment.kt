@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 class CoursesDetailFragment : Fragment() {
 
 
-    private var hasShownDialog = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,36 +33,12 @@ class CoursesDetailFragment : Fragment() {
 
         val algorithmId = arguments?.getString("algorithmId")
 
-        if (algorithmId != null && !hasShownDialog) {
-            hasShownDialog = true
-            val alertDialogBuilder = AlertDialog.Builder(requireContext())
-            alertDialogBuilder.setTitle("Hello!")
-            alertDialogBuilder.setMessage("Welcome to the marvelous world of algorithms! Would you like a detailed description about the algorithm?")
-            alertDialogBuilder.setPositiveButton("Yes") { dialog, which ->
-                dialog.dismiss()
-
-                val algorithmRepository = AlgorithmRepository()
-                lifecycleScope.launch {
-                    val algorithm = algorithmRepository.getOneAlgorithmById(algorithmId)
-                    if (algorithm != null && algorithm.detailDescription != null) {
-                        val detailDescriptionDialogBuilder = AlertDialog.Builder(requireContext())
-                        detailDescriptionDialogBuilder.setTitle("Detailed description")
-                        detailDescriptionDialogBuilder.setMessage(algorithm.detailDescription)
-                        detailDescriptionDialogBuilder.setPositiveButton("Finish") { dialog, which ->
-                            dialog.dismiss()
-                        }
-                        val detailDescriptionDialog = detailDescriptionDialogBuilder.create()
-                        detailDescriptionDialog.show()
-                    } else {
-                        Log.d("Detail Description", "Nincs részletes leírás.")
-                    }
-                }
+        if (algorithmId != null) {
+            val lastAlgorithmId = PreferenceHelper.getLastAlgorithmId(requireContext())
+            if (lastAlgorithmId == null || lastAlgorithmId != algorithmId) {
+                showWelcomeDialog(algorithmId)
+                PreferenceHelper.setLastAlgorithmId(requireContext(), algorithmId)
             }
-            alertDialogBuilder.setNegativeButton("No") { dialog, which ->
-                dialog.dismiss()
-            }
-            val alertDialog = alertDialogBuilder.create()
-            alertDialog.show()
         }
 
         val videoCardView = view.findViewById<CardView>(R.id.video)
@@ -123,6 +98,37 @@ class CoursesDetailFragment : Fragment() {
                     .commit()
             }
         }
+    }
+
+    private fun showWelcomeDialog(algorithmId: String) {
+        val alertDialogBuilder = AlertDialog.Builder(requireContext())
+        alertDialogBuilder.setTitle("Hello!")
+        alertDialogBuilder.setMessage("Welcome to the marvelous world of algorithms! Would you like a detailed description about the algorithm?")
+        alertDialogBuilder.setPositiveButton("Yes") { dialog, which ->
+            dialog.dismiss()
+
+            val algorithmRepository = AlgorithmRepository()
+            lifecycleScope.launch {
+                val algorithm = algorithmRepository.getOneAlgorithmById(algorithmId)
+                if (algorithm != null && algorithm.detailDescription != null) {
+                    val detailDescriptionDialogBuilder = AlertDialog.Builder(requireContext())
+                    detailDescriptionDialogBuilder.setTitle("Detailed description")
+                    detailDescriptionDialogBuilder.setMessage(algorithm.detailDescription)
+                    detailDescriptionDialogBuilder.setPositiveButton("Finish") { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    val detailDescriptionDialog = detailDescriptionDialogBuilder.create()
+                    detailDescriptionDialog.show()
+                } else {
+                    Log.d("Detail Description", "Nincs részletes leírás.")
+                }
+            }
+        }
+        alertDialogBuilder.setNegativeButton("No") { dialog, which ->
+            dialog.dismiss()
+        }
+        val alertDialog = alertDialogBuilder.create()
+        alertDialog.show()
     }
 
     private fun navigateToFragment(fragment: Fragment) {

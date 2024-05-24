@@ -4,18 +4,22 @@ import android.content.Context
 import android.content.SharedPreferences
 
 object PreferenceHelper {
-    private const val PREFERENCES_NAME = "my_preferences"
-    private const val KEY_PREFIX_SHOW_WELCOME_DIALOG = "show_welcome_dialog_"
+    private const val PREFS_NAME = "algorithm_prefs"
+    private const val KEY_LAST_ALGORITHM_ID = "last_algorithm_id"
 
     private fun getPreferences(context: Context): SharedPreferences {
-        return context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
-    fun shouldShowWelcomeDialog(context: Context, algorithmId: String): Boolean {
-        return getPreferences(context).getBoolean(KEY_PREFIX_SHOW_WELCOME_DIALOG + algorithmId, true)
+    fun getLastAlgorithmId(context: Context): String? {
+        return getPreferences(context).getString(KEY_LAST_ALGORITHM_ID, null)
     }
 
-    fun setWelcomeDialogShown(context: Context, algorithmId: String) {
-        getPreferences(context).edit().putBoolean(KEY_PREFIX_SHOW_WELCOME_DIALOG + algorithmId, false).apply()
+    fun setLastAlgorithmId(context: Context, algorithmId: String) {
+        getPreferences(context).edit().putString(KEY_LAST_ALGORITHM_ID, algorithmId).apply()
+    }
+
+    fun clearLastAlgorithmId(context: Context) {
+        getPreferences(context).edit().remove(KEY_LAST_ALGORITHM_ID).apply()
     }
 }
