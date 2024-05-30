@@ -1,5 +1,7 @@
 package com.example.algorythmics.presentation
 
+import androidx.compose.ui.graphics.Color
+
 data class ListUiItem(
     val id:Int,
     val value:Int,
@@ -9,6 +11,7 @@ data class ListUiItem(
     var isSorted: Boolean = false,
     var isFound: Boolean = false,
     val needsColorUpdate: Boolean = false,
-    var shouldMove: Boolean = false
+    var shouldMove: Boolean = false,
+    val color: Color = Color.Blue // Default color
 
 )
