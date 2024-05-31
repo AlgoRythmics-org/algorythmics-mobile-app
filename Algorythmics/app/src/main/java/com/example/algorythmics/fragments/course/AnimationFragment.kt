@@ -78,7 +78,6 @@ class AnimationFragment : Fragment() {
             setPadding(0, 50, 0, 0)
         }
 
-
         // Vissza gomb hozzáadása
         backBtn3 = ImageView(context).apply {
             setImageResource(R.drawable.back2)
@@ -93,7 +92,6 @@ class AnimationFragment : Fragment() {
             setOnClickListener { requireActivity().onBackPressed() }
         }
         mainLayout.addView(backBtn3)
-
 
         // RecyclerView létrehozása és hozzáadása
         recyclerView = RecyclerView(context).apply {
@@ -162,7 +160,7 @@ class AnimationFragment : Fragment() {
         }
         buttonLayout.addView(btnShuffle)
 
-// Step gomb létrehozása és hozzáadása
+        // Step gomb létrehozása és hozzáadása
         btnStep = Button(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 0,
@@ -180,7 +178,7 @@ class AnimationFragment : Fragment() {
         }
         buttonLayout.addView(btnStep)
 
-    // Start gomb létrehozása és hozzáadása
+        // Start gomb létrehozása és hozzáadása
         val btnStart = Button(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 0,
@@ -198,17 +196,14 @@ class AnimationFragment : Fragment() {
         }
         buttonLayout.addView(btnStart)
 
-
         mainLayout.addView(buttonLayout)
 
         return mainLayout
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val itemDecoration = ItemDecoration()
         algorithmId = arguments?.getString("algorithmId") ?: ""
 
         sortedListAdapter = SortedListAdapter()
@@ -227,6 +222,9 @@ class AnimationFragment : Fragment() {
         } else {
             etSearchNumber.visibility = View.GONE
         }
+
+        // Reset the step button state
+        linearSearchViewModel.resetStepButton()
 
         observeViewModel()
     }
@@ -289,6 +287,11 @@ class AnimationFragment : Fragment() {
                 binarySearchAdapter.submitList(newList)
             }
         })
+
+        // Observe isStepButtonEnabled LiveData to update button state
+        linearSearchViewModel.isStepButtonEnabled.observe(viewLifecycleOwner, Observer { isEnabled ->
+            btnStep.isEnabled = isEnabled
+        })
     }
 
     private fun Int.dpToPx(): Int {
@@ -307,13 +310,11 @@ class AnimationFragment : Fragment() {
 
     private fun handleShuffleButtonClick() {
         when (algorithmId) {
-            // Itt adhatod hozzá azokat az eseteket, amikor a Shuffle gombra kattintva
-            // meg szeretnéd keverni az algoritmusok listáját
+
             "65b8db1995d5f3a10bccd361", // Bubble Sort
             "653d3cf5ce1b18cbd8bd14b8" -> { // Linear Search
                 linearSearchViewModel.shuffleList()
             }
-
         }
     }
 
@@ -321,7 +322,5 @@ class AnimationFragment : Fragment() {
         val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
         linearSearchViewModel.stepLinearSearch(searchNumber)
     }
-
-
 }
 

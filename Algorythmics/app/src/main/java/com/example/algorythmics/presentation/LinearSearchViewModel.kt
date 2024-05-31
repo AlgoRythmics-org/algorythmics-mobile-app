@@ -21,10 +21,14 @@ class LinearSearchViewModel  : ViewModel() {
     private val _searchResult = MutableLiveData<Int?>()
     val searchResult: LiveData<Int?> get() = _searchResult
 
-    // A lépések számát és az aktuális lépést tároljuk
     private var totalSteps = 0
     private var currentStep = 0
-    private var isSearching = false
+    private var isSearching: Boolean = false
+
+
+    private val _isStepButtonEnabled = MutableLiveData<Boolean>()
+    val isStepButtonEnabled: LiveData<Boolean> get() = _isStepButtonEnabled
+
 
     fun startLinearSearch( searchNumber: Int) {
         viewModelScope.launch {
@@ -41,7 +45,7 @@ class LinearSearchViewModel  : ViewModel() {
                 }
                 _listToSearch.value = updatedList.toMutableList()
 
-                // Wait for a short period to make the color change visible
+
                 delay(1000)
 
                 // Search
@@ -52,9 +56,9 @@ class LinearSearchViewModel  : ViewModel() {
             }
 
             foundIndex?.let { index ->
-                // Color the found element green and reset others
+
                 val updatedList = list.mapIndexed { idx, it ->
-                    if (idx == index) it.copy(isFound = true, color = androidx.compose.ui.graphics.Color.Green)
+                    if (idx == index) it.copy(isFound = true, color = Color.Green)
                     else it.copy(isCurrentlyCompared = false)
                 }
                 _listToSearch.value = updatedList.toMutableList()
@@ -85,44 +89,46 @@ class LinearSearchViewModel  : ViewModel() {
         _listToSearch.value = shuffledList.toMutableList()
     }
 
-    // A keresés lépésenkénti elvégzése
 
     fun stepLinearSearch(searchNumber: Int): Boolean {
         val list = _listToSearch.value ?: return false
 
         if (!isSearching) {
-            // Először töröljük az esetleges előző eredményeket
             _searchResult.value = null
             totalSteps = list.size
             currentStep = 0
             isSearching = true
+            _isStepButtonEnabled.value = true
         }
 
-        if (currentStep < totalSteps && isSearching) {
-            // A következő lépés végrehajtása
-            val item = list[currentStep]
+        if (!isSearching) {
+            return false
+        }
 
-            // A következő elem kiemelése
+        if (currentStep < totalSteps) {
+            val item = list[currentStep]
             val updatedList = list.mapIndexed { index, it ->
                 it.copy(isCurrentlyCompared = index == currentStep)
             }
             _listToSearch.value = updatedList.toMutableList()
 
-
-            // Ha megtaláltuk az elemet, megállunk
             if (item.value == searchNumber) {
                 _searchResult.value = currentStep
-                isSearching = false // Keresés leállítása
-                return true // Sikeres találat
+                isSearching = false
+                _isStepButtonEnabled.value = false
+                return true
             }
 
-            // Következő lépésre lépés, ha még nem találtuk meg az elemet
             currentStep++
+        } else {
+            isSearching = false
+            _isStepButtonEnabled.value = false
         }
 
-        return false // Nincs találat, vagy a keresés befejeződött
+        return false
     }
 
-
-
+    fun resetStepButton() {
+        _isStepButtonEnabled.value = true
+    }
 }
