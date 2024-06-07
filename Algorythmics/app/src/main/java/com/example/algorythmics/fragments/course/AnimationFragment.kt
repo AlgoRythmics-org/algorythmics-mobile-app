@@ -13,8 +13,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -22,7 +20,10 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
-import com.example.algorythmics.animation.BubbleSort
+import com.example.algorythmics.adapters.BinarySearchAdapter
+import com.example.algorythmics.adapters.MergeSortAdapter
+import com.example.algorythmics.adapters.SelectionSortListAdapter
+import com.example.algorythmics.adapters.SortedListAdapter
 import com.example.algorythmics.presentation.BinarySearchViewModel
 import com.example.algorythmics.presentation.BubbleSortViewModel
 import com.example.algorythmics.presentation.HeapSortViewModel
@@ -238,7 +239,7 @@ class AnimationFragment : Fragment() {
             tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
         })
 
-        insertionSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
+        insertionSortViewModel.sortedList.observe(viewLifecycleOwner, Observer {
             sortedListAdapter.submitList(it)
         })
 
@@ -300,7 +301,9 @@ class AnimationFragment : Fragment() {
 
     private fun handleStartButtonClick() {
         when (algorithmId) {
+            "653d32ffce1b18cbd8bd14b2" -> insertionSortViewModel.startInsertionSorting()
             "65b8db1995d5f3a10bccd361" -> bubbleSortViewModel.startSorting()
+            "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.startSelectionSorting()
             "653d3cf5ce1b18cbd8bd14b8" -> {
                 val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
                 linearSearchViewModel.startLinearSearch(searchNumber)
@@ -311,10 +314,9 @@ class AnimationFragment : Fragment() {
     private fun handleShuffleButtonClick() {
         when (algorithmId) {
 
-            "65b8db1995d5f3a10bccd361", // Bubble Sort
-            "653d3cf5ce1b18cbd8bd14b8" -> { // Linear Search
-                linearSearchViewModel.shuffleList()
-            }
+            "653d32ffce1b18cbd8bd14b2" -> insertionSortViewModel.shuffleList() //Insertion sort
+            "653d3cf5ce1b18cbd8bd14b8" -> linearSearchViewModel.shuffleList() //Linear search
+
         }
     }
 

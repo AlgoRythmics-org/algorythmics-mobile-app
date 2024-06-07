@@ -11,8 +11,11 @@ import kotlinx.coroutines.launch
 class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseCase = InsertionSortUseCase())
     : SortingViewModel() {
 
-    private val _listToSort = MutableLiveData<List<ListUiItem>>()
-    val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
+    private val _originalList = MutableLiveData<List<ListUiItem>>()
+    val originalList: LiveData<List<ListUiItem>> get() = _originalList
+
+    private val _sortedList = MutableLiveData<List<ListUiItem>>()
+    val sortedList: LiveData<List<ListUiItem>> get() = _sortedList
 
     init {
         val list = mutableListOf<ListUiItem>()
@@ -21,24 +24,29 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
                 ListUiItem(
                     id = i,
                     value = item,
-                    isSorted = (i == 0)
+                   // isSorted = (i == 0)
                 )
             )
         }
-        _listToSort.value = list
+        _originalList.value = list.toList()
+        _sortedList.value = list.toList()
     }
 
     fun startInsertionSorting() {
         viewModelScope.launch {
-            _listToSort.value?.let { initialList ->
+            _sortedList.value?.let { initialList ->
                 val newList = initialList.toMutableList()
+                newList[0] = newList[0].copy(isSorted = true) // Set the first item as sorted (gray)
+                _sortedList.value = newList.toList()
+                delay(1000)
+
                 for (i in 1 until newList.size) {
                     var j = i
-                    _listToSort.value = newList.toList()
+                    _sortedList.value = newList.toList()
                     delay(1500)
 
                     newList[j] = newList[j].copy(isCurrentlyCompared = true)
-                    _listToSort.value = newList.toList()
+                    _sortedList.value = newList.toList()
                     delay(800)
 
                     while (j > 0 && newList[j].value < newList[j - 1].value) {
@@ -47,24 +55,24 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
                         newList[j] = newList[j - 1]
                         newList[j - 1] = temp
 
-                        _listToSort.value = newList.toList()
+                        _sortedList.value = newList.toList()
                         delay(800)
 
                         j--
                     }
                     newList[j] = newList[j].copy(isCurrentlyCompared = false, isSorted = true)
-                    _listToSort.value = newList.toList()
+                    _sortedList.value = newList.toList()
                     delay(800)
                 }
 
-                _listToSort.value = newList.map { it.copy(isSorted = true) }
+                _sortedList.value = newList.map { it.copy(isSorted = true) }
             }
         }
     }
 
     fun shuffleList() {
-        val list = _listToSort.value ?: return
+        val list = _originalList.value ?: return
         val shuffledList = list.shuffled()
-        _listToSort.value = shuffledList.toMutableList()
+        _sortedList.value = shuffledList
     }
 }
