@@ -1,4 +1,4 @@
-package com.example.algorythmics.fragments.course
+package com.example.algorythmics.adapters
 
 import android.graphics.Color
 import android.view.Gravity
@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
 import com.example.algorythmics.presentation.ListUiItem
 
-class BinarySearchAdapter : ListAdapter<ListUiItem, BinarySearchAdapter.ViewHolder>(DiffCallback) {
+class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(DiffCallback) {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView: TextView = itemView.findViewById(R.id.text_view)
@@ -29,23 +29,33 @@ class BinarySearchAdapter : ListAdapter<ListUiItem, BinarySearchAdapter.ViewHold
         holder.textView.text = item.value.toString()
         holder.textView.gravity = Gravity.CENTER
 
-        val initialColor = Color.parseColor("#1BDBBE")
-        val comparisonColor = Color.parseColor("#FF5733")
-        val foundColor = Color.parseColor("#FFA500")
+        val height = calculateHeight(item.value)
+        holder.textView.layoutParams.height = height
 
-        // Az aktuális elem háttérszíne az összehasonlítás vagy találat alapján
         val backgroundColor = when {
-            item.isCurrentlyCompared -> comparisonColor
-            item.isFound -> foundColor // Ha már megtaláltuk az elemet
-            else -> initialColor
+            item.isCurrentlyCompared -> Color.parseColor("#FF5733") // Például piros szín az összehasonlított elemekhez
+            item.isSorted -> Color.parseColor("#A9A9A9") // Szürke szín a rendezett elemekhez
+            else -> Color.parseColor("#1BDBBE") // Például alapértelmezett szín
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
+
     }
 
-    fun updateList(newList: List<ListUiItem>) {
-        submitList(newList)
+
+    private fun calculateHeight(value: Int): Int {
+        val maxHeight = 60
+        // Csak akkor alkalmazd a számítást, ha az érték meghaladja a maximális magasságot
+        return if (value > maxHeight) {
+            maxHeight
+        } else {
+            // A magasság beállítása valamilyen érték függvényében
+            // Például: 50 pixel + (érték * 10 pixel)
+            20 + (value * 10)
+        }
     }
+
+
 
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<ListUiItem>() {

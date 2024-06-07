@@ -1,4 +1,4 @@
-package com.example.algorythmics.fragments.course
+package com.example.algorythmics.adapters
 
 import android.graphics.Color
 import android.view.Gravity
@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
 import com.example.algorythmics.presentation.ListUiItem
 
-class MergeSortAdapter : ListAdapter<ListUiItem, MergeSortAdapter.ViewHolder>(DiffCallback) {
+class BinarySearchAdapter : ListAdapter<ListUiItem, BinarySearchAdapter.ViewHolder>(DiffCallback) {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView: TextView = itemView.findViewById(R.id.text_view)
@@ -32,19 +32,16 @@ class MergeSortAdapter : ListAdapter<ListUiItem, MergeSortAdapter.ViewHolder>(Di
         val initialColor = Color.parseColor("#1BDBBE")
         val comparisonColor = Color.parseColor("#FF5733")
         val foundColor = Color.parseColor("#FFA500")
-        val swappedColor = Color.parseColor("#FFFF00") // Új szín a csere jelzésére
 
-        // Az aktuális elem háttérszíne az összehasonlítás, találat vagy csere alapján
+        // Az aktuális elem háttérszíne az összehasonlítás vagy találat alapján
         val backgroundColor = when {
             item.isCurrentlyCompared -> comparisonColor
-            item.isFound -> foundColor
-            item.needsColorUpdate -> swappedColor // Ha színezést igényel
+            item.isFound -> foundColor // Ha már megtaláltuk az elemet
             else -> initialColor
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
     }
-
 
     fun updateList(newList: List<ListUiItem>) {
         submitList(newList)

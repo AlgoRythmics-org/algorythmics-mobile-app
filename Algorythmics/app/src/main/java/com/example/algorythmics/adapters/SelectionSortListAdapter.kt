@@ -1,24 +1,21 @@
-package com.example.algorythmics.fragments.course
+package com.example.algorythmics.adapters
 
-import android.animation.ObjectAnimator
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.graphics.Color
-import android.os.Handler
-import android.view.animation.Animation
-import android.view.animation.TranslateAnimation
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.algorythmics.R
 import com.example.algorythmics.presentation.ListUiItem
-import com.example.algorythmics.retrofit.models.SelectionSortInfo
 
 
-class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapter.ViewHolder>(DiffCallback) {
+class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapter.ViewHolder>(
+    DiffCallback
+) {
 
     private var smallestItemIndex: Int = -1
 
@@ -26,7 +23,7 @@ class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapte
         val textView: TextView = itemView.findViewById(R.id.text_view)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectionSortListAdapter.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_sorted_list, parent, false)
         return ViewHolder(view)
@@ -39,13 +36,12 @@ class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapte
 
         val initialColor = Color.parseColor("#1BDBBE")
         val smallestItemColor = Color.RED
-        val replacedItemColor = Color.GRAY
 
         // Determine the background color based on the state of the item
         val backgroundColor = when {
-            position == smallestItemIndex -> smallestItemColor // Smallest item is red
-            item.isCurrentlyCompared -> initialColor // Other currently compared items stay green
-            else -> initialColor // Default color for other items
+            position == smallestItemIndex -> smallestItemColor
+            item.isCurrentlyCompared -> smallestItemColor
+            else -> initialColor
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
