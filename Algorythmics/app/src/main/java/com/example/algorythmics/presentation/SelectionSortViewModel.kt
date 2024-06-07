@@ -4,9 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.algorythmics.fragments.course.SelectionSortListAdapter
-import com.example.algorythmics.retrofit.models.SelectionSortInfo
 import com.example.algorythmics.use_case.SelectionSortUseCase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -15,9 +14,13 @@ class SelectionSortViewModel
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
+    private var minIndex = 0
+    private var i = 0
+    private var step = 0
+
     init {
         val list = mutableListOf<ListUiItem>()
-        for (i in 0 until 9) {
+        for (i in 0 until 10) {
             list.add(
                 ListUiItem(
                     id = i,
@@ -31,51 +34,100 @@ class SelectionSortViewModel
 
     fun startSelectionSorting() {
         viewModelScope.launch {
-            val initialList = _listToSort.value!!.map { it.copy(isCurrentlyCompared = false) }
+            val initialList = _listToSort.value!!.map { it.copy(isCurrentlyCompared = false, isSorted = false) }
             _listToSort.value = initialList
 
-            selectionSortUseCase(_listToSort.value!!.map { it.value }
-                .toMutableList()).collect { swapInfo ->
-                val currentItemIndex = swapInfo.currentItem
+            val list = _listToSort.value!!.toMutableList()
+            val n = list.size
 
-                if (currentItemIndex >= 0 && currentItemIndex < _listToSort.value!!.size - 1) {
-                    val newList = _listToSort.value!!.toMutableList()
+            for (i in 0 until n - 1) {
+                var minIndex = i
 
-                    if (swapInfo.shouldSwap) {
-                        val firstItem = newList[currentItemIndex].copy(isCurrentlyCompared = false)
-                        newList[currentItemIndex] =
-                            newList[swapInfo.itemToSwap].copy(isCurrentlyCompared = false)
-                        newList[swapInfo.itemToSwap] = firstItem
+                for (j in i until n) {
+                    list[j] = list[j].copy(isCurrentlyCompared = true)
+                    _listToSort.value = list.toList()
+                    delay(500)
+
+                    if (list[j].value < list[minIndex].value) {
+                        minIndex = j
                     }
-                    // Elemek cseréje
-                    val temp = newList[currentItemIndex]
-                    newList[currentItemIndex] = newList[swapInfo.itemToSwap]
-                    newList[swapInfo.itemToSwap] = temp
 
-                    // Csak az éppen cserélt elemet állítjuk pirosra
-                    newList[currentItemIndex] =
-                        newList[currentItemIndex].copy(isCurrentlyCompared = true)
-
-                    newList[currentItemIndex] =
-                        newList[currentItemIndex].copy(isCurrentlyCompared = false)
-                    newList[swapInfo.itemToSwap] =
-                        newList[swapInfo.itemToSwap].copy(isCurrentlyCompared = false)
-                    _listToSort.value = newList
-                    // Lista frissítése
-                    _listToSort.value = newList
+                    list[j] = list[j].copy(isCurrentlyCompared = false)
+                    _listToSort.value = list.toList()
                 }
+
+                list[minIndex] = list[minIndex].copy(isCurrentlyCompared = true)
+                _listToSort.value = list.toList()
+                delay(800)
+
+                val temp = list[i]
+                list[i] = list[minIndex]
+                list[minIndex] = temp
+
+                list[i] = list[i].copy(isCurrentlyCompared = false, isSorted = true)
+                _listToSort.value = list.toList()
+                delay(500)
             }
 
-            // Sortálás végén az összes elem pirosra állítása
-            val finalList = _listToSort.value!!.mapIndexed { index, item ->
-                if (index < _listToSort.value!!.size - 1) {
-                    item.copy(isCurrentlyCompared = true)
-                } else {
-                    item.copy(isCurrentlyCompared = false) // Utolsó elem szürke lesz
-                }
-            }
-            _listToSort.value = finalList
+            list[n - 1] = list[n - 1].copy(isCurrentlyCompared = false, isSorted = true)
+            _listToSort.value = list.toList()
         }
     }
+
+    fun stepSelectionSorting() {
+        viewModelScope.launch {
+            val list = _listToSort.value!!.toMutableList()
+            val n = list.size
+
+            if (i >= n) {
+                list[n - 1] = list[n - 1].copy(isCurrentlyCompared = false, isSorted = true)
+                _listToSort.value = list.toList()
+                return@launch
+            }
+
+            when (step) {
+                0 -> {
+                    minIndex = i
+
+                    for (j in i until n) {
+                        list[j] = list[j].copy(isCurrentlyCompared = true)
+                        _listToSort.value = list.toList()
+                        delay(500)
+
+                        if (list[j].value < list[minIndex].value) {
+                            minIndex = j
+                        }
+
+                        list[j] = list[j].copy(isCurrentlyCompared = false)
+                        _listToSort.value = list.toList()
+                    }
+
+                    list[minIndex] = list[minIndex].copy(isCurrentlyCompared = true)
+                    _listToSort.value = list.toList()
+                    step = 1
+                }
+                1 -> {
+                    val temp = list[i]
+                    list[i] = list[minIndex]
+                    list[minIndex] = temp
+
+                    list[i] = list[i].copy(isCurrentlyCompared = false, isSorted = true)
+                    _listToSort.value = list.toList()
+                    delay(500)
+
+                    i++
+                    step = 0
+                }
+            }
+        }
+    }
+
+    fun shuffleList() {
+        val list = _listToSort.value ?: return
+        val shuffledList = list.shuffled()
+        _listToSort.value = shuffledList.toMutableList()
+    }
+
+
 
 }

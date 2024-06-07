@@ -316,13 +316,19 @@ class AnimationFragment : Fragment() {
 
             "653d32ffce1b18cbd8bd14b2" -> insertionSortViewModel.shuffleList() //Insertion sort
             "653d3cf5ce1b18cbd8bd14b8" -> linearSearchViewModel.shuffleList() //Linear search
+            "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.shuffleList() //Selection sort
 
         }
     }
 
     private fun handleStepButtonClick() {
-        val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
-        linearSearchViewModel.stepLinearSearch(searchNumber)
+        //val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
+       // linearSearchViewModel.stepLinearSearch(searchNumber)
+        when (algorithmId) {
+            "653d32ffce1b18cbd8bd14b2" -> insertionSortViewModel.stepInsertionSort() //Insertion sort
+            "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.stepSelectionSorting() //Selection sort
+        }
     }
+
 }
 

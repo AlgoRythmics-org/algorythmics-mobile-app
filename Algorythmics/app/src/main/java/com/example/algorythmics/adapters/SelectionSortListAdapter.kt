@@ -36,26 +36,16 @@ class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapte
 
         val initialColor = Color.parseColor("#1BDBBE")
         val smallestItemColor = Color.RED
+        val sortedColor = Color.parseColor("#A9A9A9")
 
-        // Determine the background color based on the state of the item
         val backgroundColor = when {
+            item.isSorted -> sortedColor
             position == smallestItemIndex -> smallestItemColor
             item.isCurrentlyCompared -> smallestItemColor
             else -> initialColor
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
-    }
-
-    // Update the index of the smallest item and notify adapter of the change
-    fun updateSmallestItemIndex(index: Int) {
-        smallestItemIndex = index
-        notifyDataSetChanged()
-    }
-
-    fun resetSmallestItemIndex() {
-        smallestItemIndex = -1 // Reset the index when the smallest item is replaced
-        notifyDataSetChanged()
     }
 
     companion object {
