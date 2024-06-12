@@ -1,5 +1,6 @@
 package com.example.algorythmics.presentation
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,12 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
     private val _sortedList = MutableLiveData<List<ListUiItem>>()
     val sortedList: LiveData<List<ListUiItem>> get() = _sortedList
 
+    private var currentStep = 0
+    private var isSorting = false
+    private var phase = 0
+    private var comparisonIndex = 0
+
+
     init {
         val list = mutableListOf<ListUiItem>()
         for ((i, item) in insertionSortUseCase.items.withIndex()) {
@@ -24,7 +31,6 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
                 ListUiItem(
                     id = i,
                     value = item,
-                   // isSorted = (i == 0)
                 )
             )
         }
@@ -36,7 +42,7 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
         viewModelScope.launch {
             _sortedList.value?.let { initialList ->
                 val newList = initialList.toMutableList()
-                newList[0] = newList[0].copy(isSorted = true) // Set the first item as sorted (gray)
+                newList[0] = newList[0].copy(isSorted = true)
                 _sortedList.value = newList.toList()
                 delay(1000)
 
@@ -66,6 +72,64 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
                 }
 
                 _sortedList.value = newList.map { it.copy(isSorted = true) }
+            }
+        }
+    }
+
+    fun stepInsertionSort() {
+        viewModelScope.launch {
+            val currentListSize = _sortedList.value?.size ?: return@launch
+            if (!isSorting) {
+                isSorting = true
+                currentStep = 1
+                phase = 0
+                comparisonIndex = 1
+            }
+
+            val newList = _sortedList.value?.toMutableList() ?: return@launch
+
+            when {
+                phase == 0 -> {
+                    newList[0] = newList[0].copy(isSorted = true, color = Color.Gray)
+                    _sortedList.value = newList.toList()
+                    phase = 1
+                }
+                phase == 1 -> {
+                    if (currentStep < currentListSize) {
+                        newList[currentStep] = newList[currentStep].copy(isCurrentlyCompared = true, color = Color.Red)
+                        _sortedList.value = newList.toList()
+                        delay(1000)
+                        phase = 2
+                    } else {
+                        isSorting = false
+                        for (i in 0 until currentListSize) {
+                            if (!newList[i].isSorted) {
+                                newList[i] = newList[i].copy(isCurrentlyCompared = false, isSorted = true, color = Color.Gray)
+                            }
+                        }
+                        _sortedList.value = newList.toList()
+                    }
+                }
+                phase == 2 -> {
+                    if (comparisonIndex > 0 && newList[comparisonIndex].value < newList[comparisonIndex - 1].value) {
+                        val temp = newList[comparisonIndex]
+                        newList[comparisonIndex] = newList[comparisonIndex - 1]
+                        newList[comparisonIndex - 1] = temp
+
+                        newList[comparisonIndex] = newList[comparisonIndex].copy(color = Color.Red)
+                        newList[comparisonIndex - 1] = newList[comparisonIndex - 1].copy(color = Color.Gray)
+                        _sortedList.value = newList.toList()
+
+                        comparisonIndex--
+                    } else {
+                        newList[comparisonIndex] = newList[comparisonIndex].copy(isCurrentlyCompared = false, isSorted = true, color = Color.Gray)
+                        _sortedList.value = newList.toList()
+
+                        phase = 1
+                        currentStep++
+                        comparisonIndex = currentStep
+                    }
+                }
             }
         }
     }
