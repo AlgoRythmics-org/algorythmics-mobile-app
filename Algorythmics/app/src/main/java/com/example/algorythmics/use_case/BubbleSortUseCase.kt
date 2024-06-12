@@ -8,9 +8,12 @@ import kotlinx.coroutines.flow.flow
 
 class BubbleSortUseCase : SortingAlgorithm() {
 
+    private var currentItemIndex = 0
+    private var pass = 0
     init {
         initialize()
     }
+
 
     operator fun invoke() : Flow<SortInfo> = flow {
         val n = elements.size
@@ -30,18 +33,7 @@ class BubbleSortUseCase : SortingAlgorithm() {
     }
 
 
-    fun performNextStep(list: MutableList<Int>, currentItemIndex: Int): SortInfo {
-        val nextItemIndex = currentItemIndex + 1
-        if (nextItemIndex < list.size) {
-            val currentItem = list[currentItemIndex]
-            val nextItem = list[nextItemIndex]
-            if (currentItem > nextItem) {
-                list.swap(currentItemIndex, nextItemIndex)
-                return SortInfo(currentItem = currentItemIndex, shouldSwap = true, hadNoEffect = false)
-            }
-        }
-        return SortInfo(currentItem = currentItemIndex, shouldSwap = false, hadNoEffect = true)
-    }
+
 }
 
 fun <T> MutableList<T>.swap(indexOne:Int, indexTwo:Int){
