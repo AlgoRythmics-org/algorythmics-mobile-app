@@ -32,19 +32,17 @@ class BinarySearchAdapter : ListAdapter<ListUiItem, BinarySearchAdapter.ViewHold
         val initialColor = Color.parseColor("#1BDBBE")
         val comparisonColor = Color.parseColor("#FF5733")
         val foundColor = Color.parseColor("#FFA500")
+        val grayColor = Color.parseColor("#A9A9A9")
 
         // Az aktuális elem háttérszíne az összehasonlítás vagy találat alapján
         val backgroundColor = when {
-            item.isCurrentlyCompared -> comparisonColor
-            item.isFound -> foundColor // Ha már megtaláltuk az elemet
-            else -> initialColor
+            item.isCurrentlyCompared && !item.isFound -> comparisonColor
+            item.isFound -> foundColor // Ha már megtaláltuk az
+            item.isSorted -> grayColor
+            else -> initialColor // Alapértelmezett szín, ha sem az egyik, sem a másik nem igaz
         }
 
-        holder.itemView.setBackgroundColor(backgroundColor)
-    }
-
-    fun updateList(newList: List<ListUiItem>) {
-        submitList(newList)
+         holder.itemView.setBackgroundColor(backgroundColor)
     }
 
     companion object {

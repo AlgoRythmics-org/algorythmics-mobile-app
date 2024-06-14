@@ -1,5 +1,6 @@
 package com.example.algorythmics.presentation
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,30 @@ class BinarySearchViewModel : ViewModel() {
     private val _searchResult = MutableLiveData<Int?>()
     val searchResult: LiveData<Int?> get() = _searchResult
 
+    private var isSearching = false
+
+    private var low = 0
+    private var high = 0
+    private var mid = 0
+    private var searchNumber = 0
+    private var foundIndex: Int? = null
+
+    init {
+        val list = mutableListOf<ListUiItem>()
+        repeat(9) {
+            list.add(
+                ListUiItem(
+                    id = it,
+                    isCurrentlyCompared = false,
+                    value = Random.nextInt(100),
+                )
+            )
+        }
+        // Sort the list for binary search
+        list.sortBy { it.value }
+        _listToSearch.value = list
+    }
+
     fun startBinarySearch(searchNumber: Int) {
         viewModelScope.launch {
             _searchResult.value = null
@@ -24,66 +49,123 @@ class BinarySearchViewModel : ViewModel() {
             var high = list.size - 1
             var foundIndex: Int? = null
 
-            val comparisons = mutableListOf<Int>() // Összehasonlítások listája
-
             while (low <= high) {
                 val mid = (low + high) / 2
                 val midValue = list[mid].value
 
-                // Összehasonlítás tárolása
-                comparisons.add(mid)
-
-                // Színzés előkészítése
+                // Update the UI to highlight the current middle element and dim others
                 val updatedList = list.mapIndexed { index, it ->
-                    if (index == mid) it.copy(isCurrentlyCompared = true)
-                    else if (index < low || index > high) it.copy(isCurrentlyCompared = false, isFound = false)
-                    else it
-                }
-                _listToSearch.value = updatedList.toMutableList()
+                    when {
+                        index == mid -> it.copy(isCurrentlyCompared = true, color = Color.Red)
+                        index < low || index > high -> it.copy(isSorted = true)
+                        else -> it.copy(isCurrentlyCompared = false)
+                    }
+                }.toMutableList()
 
-                // Várakozás rövid ideig, hogy látható legyen a színváltozás
-                delay(1000)
+                updateList(updatedList) // Update the LiveData with updated list
 
-                // Keresés
+                // Wait for visual effect
+                delay(1500)
+
+                // Check if the middle element is the target
                 if (midValue == searchNumber) {
                     foundIndex = mid
                     break
-                } else if (midValue < searchNumber) {
+                }
+
+                // Update search bounds
+                if (midValue < searchNumber) {
                     low = mid + 1
                 } else {
                     high = mid - 1
                 }
             }
 
-            foundIndex?.let { index ->
-                // Az összehasonlítások alapján a lista állapotának frissítése
-                val updatedList = list.mapIndexed { idx, it ->
-                    if (comparisons.contains(idx)) {
-                        if (idx == index) it.copy(isFound = true, isCurrentlyCompared = false)
-                        else it.copy(isCurrentlyCompared = true, isFound = false)
-                    } else {
-                        it.copy(isCurrentlyCompared = false, isFound = false)
-                    }
+            // Highlight the found element or reset colors if not found
+            val finalUpdatedList = list.mapIndexed { index, it ->
+                when {
+                    foundIndex != null && index == foundIndex -> it.copy(isCurrentlyCompared = false)
+                    else -> it.copy(isCurrentlyCompared = false)
                 }
-                _listToSearch.value = updatedList.toMutableList()
-                _searchResult.value = index
-            }
+            }.toMutableList()
+
+            updateList(finalUpdatedList) // Update the LiveData with final updated list
+            _searchResult.value = foundIndex
         }
     }
 
-    init {
-        val list = mutableListOf<ListUiItem>()
-        repeat(10) {
-            list.add(
-                ListUiItem(
-                    id = it,
-                    isCurrentlyCompared = false,
-                    value = Random.nextInt(100)
-                )
-            )
+    private var currentStepIndex = -1
+
+
+    fun stepBinarySearch(searchNumber: Int) {
+        if (!isSearching) {
+            isSearching = true
+            low = 0
+            high = _listToSearch.value?.size?.minus(1) ?: 0
+            currentStepIndex = 0
+            foundIndex = null
+            this.searchNumber = searchNumber
+            _searchResult.value = null
         }
-        // Rendezzük a listát, hogy a bináris keresés működjön
-        list.sortBy { it.value }
-        _listToSearch.value = list
+
+        viewModelScope.launch {
+            val list = _listToSearch.value ?: return@launch
+
+            if (low > high) {
+                // Search ended, number not found
+                _searchResult.value = null
+                isSearching = false
+                return@launch
+            }
+
+            when (currentStepIndex) {
+                0 -> {
+                    mid = (low + high) / 2
+                    // Highlight the current middle element and dim others
+                    val updatedList = list.mapIndexed { index, it ->
+                        when {
+                            index == mid -> it.copy(isCurrentlyCompared = true, color = Color.Red)
+                            index < low || index > high -> it.copy(isSorted = true, color = Color.Gray)
+                            else -> it.copy(isCurrentlyCompared = false)
+                        }
+                    }.toMutableList()
+                    updateList(updatedList)
+                    currentStepIndex = 1
+                }
+                1 -> {
+                    val midValue = list[mid].value
+                    if (midValue == searchNumber) {
+                        // Number found
+                        foundIndex = mid
+                        isSearching = false
+                        val updatedList = list.mapIndexed { index, it ->
+                            if (index == mid) it.copy(isCurrentlyCompared = false, color = Color.Green)
+                            else it.copy(isCurrentlyCompared = false)
+                        }.toMutableList()
+                        updateList(updatedList)
+                        _searchResult.value = mid
+                    } else {
+                        if (midValue < searchNumber) {
+                            low = mid + 1
+                        } else {
+                            high = mid - 1
+                        }
+                        // Reset the middle element's color and update the dimmed elements
+                        val updatedList = list.mapIndexed { index, it ->
+                            when {
+                                index == mid -> it.copy(isCurrentlyCompared = false, color = Color.Black)
+                                index < low || index > high -> it.copy(isSorted = true, color = Color.Gray)
+                                else -> it.copy(isCurrentlyCompared = false)
+                            }
+                        }.toMutableList()
+                        updateList(updatedList)
+                        currentStepIndex = 0
+                    }
+                }
+            }
+        }
+    }
+    private fun updateList(updatedList: MutableList<ListUiItem>) {
+        _listToSearch.value = updatedList
     }
 }
