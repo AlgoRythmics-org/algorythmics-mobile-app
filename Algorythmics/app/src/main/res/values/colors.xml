@@ -32,9 +32,9 @@
 
     <color name="colorPrimary">#ffffff</color>
     <color name="colorPrimaryDark">#f1f1f1</color>
-    <color name="colorYellow">#e7a942</color>
+    <color name="colorYellow">#EEA243</color>
     <color name="colorGradStart">#FDC830</color>
-    <color name="colorGradEnd">#F37335</color>
+    <color name="colorGradEnd">#63A46C</color>
     <color name="colorWhiteTransparent">#7CFFFFFF</color>
     <color name="colorAccent">#FF4081</color>
 </resources>

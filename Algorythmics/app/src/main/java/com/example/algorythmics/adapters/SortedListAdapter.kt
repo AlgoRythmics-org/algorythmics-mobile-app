@@ -35,7 +35,8 @@ class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(
         val backgroundColor = when {
             item.isCurrentlyCompared -> Color.parseColor("#FF5733") // Például piros szín az összehasonlított elemekhez
             item.isSorted -> Color.parseColor("#A9A9A9") // Szürke szín a rendezett elemekhez
-            else -> Color.parseColor("#1BDBBE") // Például alapértelmezett szín
+            item.isFound -> Color.parseColor("#FFA500")
+            else -> Color.parseColor("#63A46C") // Például alapértelmezett szín
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
@@ -43,17 +44,26 @@ class SortedListAdapter : ListAdapter<ListUiItem, SortedListAdapter.ViewHolder>(
     }
 
 
+//    private fun calculateHeight(value: Int): Int {
+//        val maxHeight = 60
+//        // Csak akkor alkalmazd a számítást, ha az érték meghaladja a maximális magasságot
+//        return if (value > maxHeight) {
+//            maxHeight
+//        } else {
+//            // A magasság beállítása valamilyen érték függvényében
+//            // Például: 50 pixel + (érték * 10 pixel)
+//            20 + (value * 10)
+//        }
+//    }
+
     private fun calculateHeight(value: Int): Int {
-        val maxHeight = 60
-        // Csak akkor alkalmazd a számítást, ha az érték meghaladja a maximális magasságot
-        return if (value > maxHeight) {
-            maxHeight
-        } else {
-            // A magasság beállítása valamilyen érték függvényében
-            // Például: 50 pixel + (érték * 10 pixel)
-            20 + (value * 10)
-        }
+
+        val minHeight = 100
+        val maxHeight = 400
+
+        return minHeight + (value * (maxHeight - minHeight) / 100)
     }
+
 
 
 
