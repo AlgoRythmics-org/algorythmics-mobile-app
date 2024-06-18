@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.algorythmics.animation.SortingViewModel
 import com.example.algorythmics.use_case.BubbleSortUseCase
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,7 +32,9 @@ class BubbleSortViewModel(
     }
 
     override fun startSorting() {
-        viewModelScope.launch {
+
+        sortingJob?.cancel()  // Megszakítjuk az előző sortingJob-ot, ha volt
+        sortingJob = viewModelScope.launch {
             super.startSorting()
             var pass = 0
             var lastSortedIndex = _listToSort.value!!.lastIndex
@@ -47,14 +50,14 @@ class BubbleSortViewModel(
                     val firstItem = newList[currentItemIndex].copy(isCurrentlyCompared = false)
                     newList[currentItemIndex] = newList[currentItemIndex + 1].copy(isCurrentlyCompared = false)
                     newList[currentItemIndex + 1] = firstItem
-                    //val comparisonMessage = "Összehasonlítva: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}"
-                    //_comparisonMessage.postValue("$comparisonMessage\nElemek felcserélve: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
+                    val comparisonMessage = "Összehasonlítva: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}"
+                    _comparisonMessage.postValue("$comparisonMessage\nElemek felcserélve: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
                 } else if (swapInfo.hadNoEffect) {
 
                     newList[currentItemIndex] = newList[currentItemIndex].copy(isCurrentlyCompared = false)
                     newList[currentItemIndex + 1] = newList[currentItemIndex + 1].copy(isCurrentlyCompared = false)
-                   // val comparisonMessage = "Összehasonlítva: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}"
-                   // _comparisonMessage.postValue("$comparisonMessage\nElemek nem cseréltek helyet: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
+                    val comparisonMessage = "Összehasonlítva: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}"
+                     _comparisonMessage.postValue("$comparisonMessage\nElemek nem cseréltek helyet: ${newList[currentItemIndex].value} és ${newList[currentItemIndex + 1].value}")
                 }
 
                 if (currentItemIndex == lastSortedIndex) {
@@ -153,5 +156,16 @@ class BubbleSortViewModel(
         val shuffledList = list.shuffled()
         _listToSort.value = shuffledList.toMutableList()
     }
+
+    private var sortingJob: Job? = null
+    fun cancelSorting() {
+        sortingJob?.cancel()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        sortingJob?.cancel()  // ViewModel élettartama véget ér, megszakítjuk a sortingJob-ot
+    }
+
 
 }

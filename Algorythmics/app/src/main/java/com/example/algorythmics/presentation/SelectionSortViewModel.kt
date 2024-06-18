@@ -14,6 +14,12 @@ class SelectionSortViewModel
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
+    private val _animationSteps = MutableLiveData<String>()
+    val animationSteps: LiveData<String> get() = _animationSteps
+
+    private val _comparisonMessage = MutableLiveData<String>()
+    val comparisonMessage: LiveData<String> get() = _comparisonMessage
+
     private var minIndex = 0
     private var i = 0
     private var step = 0
@@ -60,6 +66,9 @@ class SelectionSortViewModel
                 _listToSort.value = list.toList()
                 delay(800)
 
+                val selectionMessage = "Legkisebb elem kiválasztva: ${list[minIndex].value}"
+                _comparisonMessage.postValue(selectionMessage)
+
                 val temp = list[i]
                 list[i] = list[minIndex]
                 list[minIndex] = temp
@@ -67,12 +76,22 @@ class SelectionSortViewModel
                 list[i] = list[i].copy(isCurrentlyCompared = false, isSorted = true)
                 _listToSort.value = list.toList()
                 delay(500)
+
+                val sortedMessage = "Rendezett elem: ${list[i].value} a pozíció: $i"
+                _comparisonMessage.postValue(sortedMessage)
+
+                val step = "Külső ciklus index: $i, Kiválasztott elem: ${list[minIndex].value}, Rendezett elem: ${list[i].value}"
+                _animationSteps.postValue(step)
             }
 
             list[n - 1] = list[n - 1].copy(isCurrentlyCompared = false, isSorted = true)
             _listToSort.value = list.toList()
+
+            val finalSortedMessage = "Rendezett elem: ${list[n - 1].value} a pozíció: ${n - 1}"
+            _comparisonMessage.postValue(finalSortedMessage)
         }
     }
+
 
     fun stepSelectionSorting() {
         viewModelScope.launch {

@@ -17,6 +17,12 @@ class LinearSearchViewModel  : ViewModel() {
     private val _searchResult = MutableLiveData<Int?>()
     val searchResult: LiveData<Int?> get() = _searchResult
 
+    private val _animationSteps = MutableLiveData<String>()
+    val animationSteps: LiveData<String> get() = _animationSteps
+
+    private val _comparisonMessage = MutableLiveData<String>()
+    val comparisonMessage: LiveData<String> get() = _comparisonMessage
+
     private var totalSteps = 0
     private var currentStep = 0
     private var isSearching: Boolean = false
@@ -42,11 +48,16 @@ class LinearSearchViewModel  : ViewModel() {
                 }
                 _listToSearch.value = updatedList.toMutableList()
 
+                val searchMessage = "Elem ${item.value} összehasonlítva a keresett számmal: $searchNumber"
+                _comparisonMessage.postValue(searchMessage)
+
                 delay(1000)
 
                 // Search
                 if (item.value == searchNumber) {
                     foundIndex = index
+                    val foundMessage = "Keresett elem megtalálva: ${item.value} a pozíció: $index"
+                    _comparisonMessage.postValue(foundMessage)
                     break
                 }
             }
@@ -58,9 +69,13 @@ class LinearSearchViewModel  : ViewModel() {
                 }
                 _listToSearch.value = updatedList.toMutableList()
                 _searchResult.value = index
+            } ?: run {
+                val notFoundMessage = "Keresett elem ($searchNumber) nem található a listában."
+                _comparisonMessage.postValue(notFoundMessage)
             }
         }
     }
+
 
     init {
         val list = mutableListOf<ListUiItem>()

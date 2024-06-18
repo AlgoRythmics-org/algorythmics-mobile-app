@@ -18,6 +18,12 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
     private val _sortedList = MutableLiveData<List<ListUiItem>>()
     val sortedList: LiveData<List<ListUiItem>> get() = _sortedList
 
+    private val _animationSteps = MutableLiveData<String>()
+    val animationSteps: LiveData<String> get() = _animationSteps
+
+    private val _comparisonMessage = MutableLiveData<String>()
+    val comparisonMessage: LiveData<String> get() = _comparisonMessage
+
     private var currentStep = 0
     private var isSorting = false
     private var phase = 0
@@ -56,6 +62,8 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
                     delay(800)
 
                     while (j > 0 && newList[j].value < newList[j - 1].value) {
+                        val comparisonMessage = "Összehasonlítva: ${newList[j].value} és ${newList[j - 1].value}"
+                        _comparisonMessage.postValue("$comparisonMessage\nElemek felcserélve: ${newList[j].value} és ${newList[j - 1].value}")
 
                         val temp = newList[j]
                         newList[j] = newList[j - 1]
@@ -66,15 +74,29 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
 
                         j--
                     }
+
+                    if (j > 0 && newList[j].value >= newList[j - 1].value) {
+                        val comparisonMessage = "Összehasonlítva: ${newList[j].value} és ${newList[j - 1].value}"
+                        _comparisonMessage.postValue("$comparisonMessage\nElemek nem cseréltek helyet: ${newList[j].value} és ${newList[j - 1].value}")
+                    }
+
                     newList[j] = newList[j].copy(isCurrentlyCompared = false, isSorted = true)
                     _sortedList.value = newList.toList()
+                    val sortedMessage = "Rendezett elem: ${newList[j].value} "
+                    _comparisonMessage.postValue(sortedMessage)
                     delay(800)
+
+                    val step = "Index: $i, Inner Loop Index: $j, Should Swap: ${j > 0 && newList[j].value < newList[j - 1].value}, Sorted Up to Index: $j"
+                    _animationSteps.postValue(step)
                 }
 
                 _sortedList.value = newList.map { it.copy(isSorted = true) }
             }
         }
     }
+
+
+
 
     fun stepInsertionSort() {
         viewModelScope.launch {

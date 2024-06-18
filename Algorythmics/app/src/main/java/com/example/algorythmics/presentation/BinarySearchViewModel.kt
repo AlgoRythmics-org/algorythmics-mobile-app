@@ -17,6 +17,12 @@ class BinarySearchViewModel : ViewModel() {
     private val _searchResult = MutableLiveData<Int?>()
     val searchResult: LiveData<Int?> get() = _searchResult
 
+    private val _animationSteps = MutableLiveData<String>()
+    val animationSteps: LiveData<String> get() = _animationSteps
+
+    private val _comparisonMessage = MutableLiveData<String>()
+    val comparisonMessage: LiveData<String> get() = _comparisonMessage
+
     private var isSearching = false
 
     private var low = 0
@@ -64,12 +70,17 @@ class BinarySearchViewModel : ViewModel() {
 
                 updateList(updatedList) // Update the LiveData with updated list
 
+                val searchMessage = "Középső elem  ${midValue} összehasonlítva a keresett elemmel $searchNumber"
+                _comparisonMessage.postValue(searchMessage)
+
                 // Wait for visual effect
                 delay(1500)
 
                 // Check if the middle element is the target
                 if (midValue == searchNumber) {
                     foundIndex = mid
+                    val foundMessage = "Keresett elem megtalálva: ${midValue} a pozíció: $mid"
+                    _comparisonMessage.postValue(foundMessage)
                     break
                 }
 
@@ -84,13 +95,18 @@ class BinarySearchViewModel : ViewModel() {
             // Highlight the found element or reset colors if not found
             val finalUpdatedList = list.mapIndexed { index, it ->
                 when {
-                    foundIndex != null && index == foundIndex -> it.copy(isCurrentlyCompared = false)
+                    foundIndex != null && index == foundIndex -> it.copy(isFound = true, isCurrentlyCompared = false)
                     else -> it.copy(isCurrentlyCompared = false)
                 }
             }.toMutableList()
 
             updateList(finalUpdatedList) // Update the LiveData with final updated list
             _searchResult.value = foundIndex
+
+            if (foundIndex == null) {
+                val notFoundMessage = "Keresett elem ($searchNumber) nem található a listában."
+                _comparisonMessage.postValue(notFoundMessage)
+            }
         }
     }
 

@@ -4,19 +4,24 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.algorythmics.use_case.QuickSortUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-class QuickSortViewModel (private val quickSortUseCase: QuickSortUseCase = QuickSortUseCase()) : ViewModel() {
+class QuickSortViewModel : ViewModel() {
 
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
+    private val _animationSteps = MutableLiveData<String>()
+    val animationSteps: LiveData<String> get() = _animationSteps
+
+    private val _comparisonMessage = MutableLiveData<String>()
+    val comparisonMessage: LiveData<String> get() = _comparisonMessage
+
     init {
         val list = mutableListOf<ListUiItem>()
-        for (i in 0 until 9) {
+        for (i in 0 until 10) {
             list.add(
                 ListUiItem(
                     id = i,
@@ -30,39 +35,204 @@ class QuickSortViewModel (private val quickSortUseCase: QuickSortUseCase = Quick
 
     fun startQuickSorting() {
         viewModelScope.launch {
-            val initialList = _listToSort.value!!.map { it.copy(isCurrentlyCompared = false) }
-            _listToSort.value = initialList
+            val list = _listToSort.value!!.toMutableList()
 
-            val processList = mutableListOf<ListUiItem>()
+            // Perform quick sort on the list
+            quickSort(list, 0, list.size - 1)
 
-            quickSortUseCase(_listToSort.value!!.map { it.value }.toMutableList(), 0, _listToSort.value!!.size - 1)
-                .collect { quickSortInfoList ->
-                    quickSortInfoList.forEachIndexed { index, quickSortInfo ->
-                        val partitionIndex = quickSortInfo.partitionIndex
-                        val newList = quickSortInfo.list.mapIndexed { listIndex, value ->
-                            ListUiItem(
-                                id = listIndex,
-                                isCurrentlyCompared = listIndex == partitionIndex,
-                                value = value
-                            )
-                        }
-                        processList.clear()
-                        processList.addAll(newList)
+            // Mark all items as sorted after sorting completes
+            for (i in list.indices) {
+                list[i] = list[i].copy(isSorted = true, isCurrentlyCompared = false)
+            }
 
-                        _listToSort.value = processList
+            // Update LiveData with the final sorted list
+            _listToSort.value = list.toList()
 
-                        delay(3000)
-
-                        if (index == quickSortInfoList.size - 1) {
-                            // Az utolsó iterációban állítjuk pirosra az összes elemet
-                            val finalList = processList.map { it.copy(isCurrentlyCompared = true) }
-                            _listToSort.value = finalList
-                        }
-                    }
-                }
+            // Post completion message
+            val completionMessage = "Gyorsrendezés befejezve."
+            _comparisonMessage.postValue(completionMessage)
         }
+    }
+
+    private suspend fun quickSort(list: MutableList<ListUiItem>, low: Int, high: Int) {
+        if (low < high) {
+            // Partition the list and get the partition index
+            val partitionIndex = partition(list, low, high)
+
+            // Recursively sort elements before and after partition
+            quickSort(list, low, partitionIndex - 1)
+            quickSort(list, partitionIndex + 1, high)
+        }
+    }
+
+    private suspend fun partition(list: MutableList<ListUiItem>, low: Int, high: Int): Int {
+        val pivot = list[high].value
+        var i = low - 1
+
+        for (j in low until high) {
+            // Mark elements being compared (red color)
+            list[j] = list[j].copy(isCurrentlyCompared = true)
+            list[high] = list[high].copy(isCurrentlyCompared = true)
+            _listToSort.value = list.toList()
+
+            // Post comparison message
+            val comparisonMessage = "Elemek összehasonlítva: ${list[j].value} és $pivot"
+            _comparisonMessage.postValue(comparisonMessage)
+
+            delay(800)
+
+            if (list[j].value < pivot) {
+                i++
+                // Swap elements
+                val temp = list[i]
+                list[i] = list[j]
+                list[j] = temp
+
+                // Post swap message
+                val swapMessage = "Elemek felcserélve: ${list[i].value} és ${list[j].value}"
+                _comparisonMessage.postValue(swapMessage)
+
+                // Update list after swap
+                _listToSort.value = list.toList()
+                delay(800)
+            }
+
+            // Reset comparison status (gray color if already sorted)
+            list[j] = list[j].copy(isCurrentlyCompared = false)
+            list[high] = list[high].copy(isCurrentlyCompared = false)
+            _listToSort.value = list.toList()
+            delay(800)
+        }
+
+        // Swap pivot element with element at i+1
+        val temp = list[i + 1]
+        list[i + 1] = list[high]
+        list[high] = temp
+
+        // Post swap message for pivot
+        val pivotSwapMessage = "Pivot (${list[i + 1].value}) helyére rendezve."
+        _comparisonMessage.postValue(pivotSwapMessage)
+
+        // Mark pivot as sorted (gray color)
+        list[i + 1] = list[i + 1].copy(isSorted = true)
+        _listToSort.value = list.toList()
+        delay(800)
+
+        return i + 1
     }
 
 
 
+    fun shuffleList() {
+        val list = _listToSort.value ?: return
+        val shuffledList = list.shuffled()
+        _listToSort.value = shuffledList.toMutableList()
+    }
+
+    var stack = mutableListOf<Pair<Int, Int>>()
+    var currentLow = 0
+    var currentHigh = 0
+    var pivotIndex = 0
+    var i = 0
+    var j = 0
+    var stepState = StepState.START
+
+    enum class StepState {
+        START, PARTITION, COMPARE, SWAP, FINAL_SWAP, COMPLETE
+    }
+
+    fun stepQuickSorting() {
+        viewModelScope.launch {
+            val list = _listToSort.value!!.toMutableList()
+
+            if (stack.isEmpty() && stepState == StepState.START) {
+                stack.add(Pair(0, list.size - 1))
+                stepState = StepState.PARTITION
+            }
+
+            if (stack.isNotEmpty()) {
+                val (low, high) = stack.last()
+                currentLow = low
+                currentHigh = high
+
+                when (stepState) {
+                    StepState.PARTITION -> {
+                        i = low - 1
+                        j = low
+                        pivotIndex = high
+                        stepState = StepState.COMPARE
+                    }
+
+                    StepState.COMPARE -> {
+                        if (j < high) {
+                            // Mark elements being compared (red color)
+                            list[j] = list[j].copy(isCurrentlyCompared = true)
+                            list[pivotIndex] = list[pivotIndex].copy(isCurrentlyCompared = true)
+                            _listToSort.value = list.toList()
+
+                            if (list[j].value < list[pivotIndex].value) {
+                                i++
+                                stepState = StepState.SWAP
+                            } else {
+                                // Reset comparison status if no swap
+                                list[j] = list[j].copy(isCurrentlyCompared = false)
+                                list[pivotIndex] = list[pivotIndex].copy(isCurrentlyCompared = false)
+                                _listToSort.value = list.toList()
+                                delay(800)
+                                j++
+                            }
+                        } else {
+                            stepState = StepState.FINAL_SWAP
+                        }
+                    }
+
+                    StepState.SWAP -> {
+                        // Swap elements
+                        val temp = list[i]
+                        list[i] = list[j]
+                        list[j] = temp
+
+                        // Update list after swap
+                        _listToSort.value = list.toList()
+                        delay(800)
+                        stepState = StepState.COMPARE
+                        j++
+                    }
+
+                    StepState.FINAL_SWAP -> {
+                        // Swap pivot element with element at i+1
+                        val temp = list[i + 1]
+                        list[i + 1] = list[pivotIndex]
+                        list[pivotIndex] = temp
+
+                        // Mark pivot as sorted (gray color)
+                        list[i + 1] = list[i + 1].copy(isSorted = true)
+                        _listToSort.value = list.toList()
+
+                        stack.removeAt(stack.lastIndex)
+                        if (i + 1 < high) stack.add(Pair(i + 2, high))
+                        if (low < i) stack.add(Pair(low, i))
+                        stepState = if (stack.isEmpty()) StepState.COMPLETE else StepState.PARTITION
+                    }
+
+                    StepState.COMPLETE -> {
+                        for (k in list.indices) {
+                            list[k] = list[k].copy(isSorted = true, isCurrentlyCompared = false)
+                        }
+                        _listToSort.value = list.toList()
+                    }
+
+                    else -> {}
+                }
+
+                // Update the list to reflect the comparison status
+                for (k in list.indices) {
+                    if (k != pivotIndex && k != j && k != i) {
+                        list[k] = list[k].copy(isCurrentlyCompared = false)
+                    }
+                }
+                _listToSort.value = list.toList()
+            }
+        }
+    }
 }

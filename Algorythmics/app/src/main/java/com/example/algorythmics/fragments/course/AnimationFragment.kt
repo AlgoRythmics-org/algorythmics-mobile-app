@@ -13,7 +13,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -29,7 +28,6 @@ import com.example.algorythmics.presentation.BinarySearchViewModel
 import com.example.algorythmics.presentation.BubbleSortViewModel
 import com.example.algorythmics.presentation.HeapSortViewModel
 import com.example.algorythmics.presentation.InsertionSortViewModel
-import com.example.algorythmics.presentation.ItemDecoration
 import com.example.algorythmics.presentation.ItemDecorator
 import com.example.algorythmics.presentation.LinearSearchViewModel
 import com.example.algorythmics.presentation.MergeSortViewModel
@@ -38,11 +36,7 @@ import com.example.algorythmics.presentation.SelectionSortViewModel
 import com.example.algorythmics.presentation.ShellSortViewModel
 
 
-
-
-
 class AnimationFragment : Fragment() {
-
     private val bubbleSortViewModel: BubbleSortViewModel by activityViewModels()
     private val insertionSortViewModel: InsertionSortViewModel by activityViewModels()
     private val selectionSortViewModel: SelectionSortViewModel by activityViewModels()
@@ -212,7 +206,6 @@ class AnimationFragment : Fragment() {
     }
 
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -262,35 +255,59 @@ class AnimationFragment : Fragment() {
                 insertionSortViewModel.sortedList.observe(viewLifecycleOwner, Observer {
                     sortedListAdapter.submitList(it)
                 })
+                insertionSortViewModel.comparisonMessage.observe(
+                    viewLifecycleOwner,
+                    Observer { message ->
+                        tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
+                    })
             }
+
             "65b8db1995d5f3a10bccd361" -> {
                 bubbleSortViewModel.listToSort.observe(viewLifecycleOwner, Observer { list ->
                     sortedListAdapter.submitList(list)
                 })
-                bubbleSortViewModel.comparisonMessage.observe(viewLifecycleOwner, Observer { message ->
-                    tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
-                })
+                bubbleSortViewModel.comparisonMessage.observe(
+                    viewLifecycleOwner,
+                    Observer { message ->
+                        tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
+                    })
             }
+
             "653d35f6ce1b18cbd8bd14b3" -> {
                 selectionSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
                     selectionSortListAdapter.submitList(it)
                 })
+                selectionSortViewModel.comparisonMessage.observe(
+                    viewLifecycleOwner,
+                    Observer { message ->
+                        tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
+                    })
             }
+
             "653d3c49ce1b18cbd8bd14b7" -> {
                 shellSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
                     sortedListAdapter.submitList(it)
                 })
             }
+
             "653d3aa2ce1b18cbd8bd14b5" -> {
                 quickSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
                     sortedListAdapter.submitList(it)
                 })
+
+                quickSortViewModel.comparisonMessage.observe(
+                    viewLifecycleOwner,
+                    Observer { message ->
+                        tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
+                    })
             }
+
             "653d36ecce1b18cbd8bd14b4" -> {
                 mergeSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
                     mergeSortAdapter.submitList(it)
                 })
             }
+
             "653d3cf5ce1b18cbd8bd14b8" -> {
                 linearSearchViewModel.listToSearch.observe(viewLifecycleOwner, Observer {
                     sortedListAdapter.submitList(it)
@@ -303,10 +320,18 @@ class AnimationFragment : Fragment() {
                         sortedListAdapter.submitList(newList)
                     }
                 })
-                linearSearchViewModel.isStepButtonEnabled.observe(viewLifecycleOwner, Observer { isEnabled ->
-                    btnStep.isEnabled = isEnabled
-                })
+                linearSearchViewModel.isStepButtonEnabled.observe(
+                    viewLifecycleOwner,
+                    Observer { isEnabled ->
+                        btnStep.isEnabled = isEnabled
+                    })
+                linearSearchViewModel.comparisonMessage.observe(
+                    viewLifecycleOwner,
+                    Observer { message ->
+                        tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
+                    })
             }
+
             "653d3dfece1b18cbd8bd14b9" -> {
                 binarySearchViewModel.listToSearch.observe(viewLifecycleOwner, Observer {
                     binarySearchAdapter.submitList(it)
@@ -319,7 +344,13 @@ class AnimationFragment : Fragment() {
                         binarySearchAdapter.submitList(newList)
                     }
                 })
+                binarySearchViewModel.comparisonMessage.observe(
+                    viewLifecycleOwner,
+                    Observer { message ->
+                        tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
+                    })
             }
+
             else -> {
                 heapSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
                     sortedListAdapter.submitList(it)
@@ -343,6 +374,7 @@ class AnimationFragment : Fragment() {
                 val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
                 linearSearchViewModel.startLinearSearch(searchNumber)
             }
+
             "653d3dfece1b18cbd8bd14b9" -> {
                 val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
                 binarySearchViewModel.startBinarySearch(searchNumber)
@@ -356,19 +388,24 @@ class AnimationFragment : Fragment() {
             "653d3cf5ce1b18cbd8bd14b8" -> linearSearchViewModel.shuffleList() //Linear search
             "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.shuffleList() //Selection sort
             "65b8db1995d5f3a10bccd361" -> bubbleSortViewModel.shuffleList() //Bubble sort
+            "653d3aa2ce1b18cbd8bd14b5" -> quickSortViewModel.shuffleList() //Quick sort
         }
     }
 
     private fun handleStepButtonClick() {
-         val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
+        //  val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
         when (algorithmId) {
             "653d32ffce1b18cbd8bd14b2" -> insertionSortViewModel.stepInsertionSort() //Insertion sort
             "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.stepSelectionSorting() //Selection sort
-          //  "653d3cf5ce1b18cbd8bd14b8" -> linearSearchViewModel.stepLinearSearch(searchNumber) //Linear search
+            //  "653d3cf5ce1b18cbd8bd14b8" -> linearSearchViewModel.stepLinearSearch(searchNumber) //Linear search
             "65b8db1995d5f3a10bccd361" -> bubbleSortViewModel.stepSorting() //Bubble sort
-            "653d3dfece1b18cbd8bd14b9" -> binarySearchViewModel.stepBinarySearch(searchNumber)
+            "653d3aa2ce1b18cbd8bd14b5" -> quickSortViewModel.stepQuickSorting() //Quick sort
+            //   "653d3dfece1b18cbd8bd14b9" -> binarySearchViewModel.stepBinarySearch(searchNumber)
         }
     }
+
 }
+
+
 
 
