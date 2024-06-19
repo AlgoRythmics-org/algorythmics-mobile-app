@@ -37,18 +37,14 @@ class QuickSortViewModel : ViewModel() {
         viewModelScope.launch {
             val list = _listToSort.value!!.toMutableList()
 
-            // Perform quick sort on the list
             quickSort(list, 0, list.size - 1)
 
-            // Mark all items as sorted after sorting completes
             for (i in list.indices) {
                 list[i] = list[i].copy(isSorted = true, isCurrentlyCompared = false)
             }
 
-            // Update LiveData with the final sorted list
             _listToSort.value = list.toList()
 
-            // Post completion message
             val completionMessage = "Gyorsrendezés befejezve."
             _comparisonMessage.postValue(completionMessage)
         }
@@ -56,10 +52,9 @@ class QuickSortViewModel : ViewModel() {
 
     private suspend fun quickSort(list: MutableList<ListUiItem>, low: Int, high: Int) {
         if (low < high) {
-            // Partition the list and get the partition index
+
             val partitionIndex = partition(list, low, high)
 
-            // Recursively sort elements before and after partition
             quickSort(list, low, partitionIndex - 1)
             quickSort(list, partitionIndex + 1, high)
         }
@@ -75,7 +70,6 @@ class QuickSortViewModel : ViewModel() {
             list[high] = list[high].copy(isCurrentlyCompared = true)
             _listToSort.value = list.toList()
 
-            // Post comparison message
             val comparisonMessage = "Elemek összehasonlítva: ${list[j].value} és $pivot"
             _comparisonMessage.postValue(comparisonMessage)
 
@@ -88,32 +82,26 @@ class QuickSortViewModel : ViewModel() {
                 list[i] = list[j]
                 list[j] = temp
 
-                // Post swap message
                 val swapMessage = "Elemek felcserélve: ${list[i].value} és ${list[j].value}"
                 _comparisonMessage.postValue(swapMessage)
 
-                // Update list after swap
                 _listToSort.value = list.toList()
                 delay(800)
             }
 
-            // Reset comparison status (gray color if already sorted)
             list[j] = list[j].copy(isCurrentlyCompared = false)
             list[high] = list[high].copy(isCurrentlyCompared = false)
             _listToSort.value = list.toList()
             delay(800)
         }
 
-        // Swap pivot element with element at i+1
         val temp = list[i + 1]
         list[i + 1] = list[high]
         list[high] = temp
 
-        // Post swap message for pivot
         val pivotSwapMessage = "Pivot (${list[i + 1].value}) helyére rendezve."
         _comparisonMessage.postValue(pivotSwapMessage)
 
-        // Mark pivot as sorted (gray color)
         list[i + 1] = list[i + 1].copy(isSorted = true)
         _listToSort.value = list.toList()
         delay(800)
