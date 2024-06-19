@@ -61,16 +61,12 @@ class QuizFragment : Fragment(), QuestionAdapter.Score {
 
         lifecycleScope.launch {
             try {
-                // Az összes quiz betöltése
                 receivedList = quizRepository.getAllQuiz().toMutableList()
 
-                // Az aktuális algoritmus azonosítója
                 val currentAlgorithmId = arguments?.getString("algorithmId")
 
-                // Szűrés az aktuális algoritmus azonosítójával megegyező quiz modellekre
                 receivedList = receivedList.filter { it.algorithmId == currentAlgorithmId }.toMutableList()
 
-                // UI beállítása és adapter inicializálása
                 setupUI()
                 questionAdapter = QuestionAdapter("", mutableListOf(), this@QuizFragment )
                 binding.questionList.apply {
