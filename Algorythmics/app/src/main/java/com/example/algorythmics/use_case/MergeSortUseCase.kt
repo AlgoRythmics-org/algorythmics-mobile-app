@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.flow
 
 class MergeSortUseCase {
 
-    private val _mergeSortInfo = MutableSharedFlow<MergeSortInfo>()
     suspend fun mergeSort(list: MutableList<Int>, startIndex: Int, endIndex: Int): Flow<List<Int>> = flow {
         if (startIndex < endIndex) {
             val mid = (startIndex + endIndex) / 2
@@ -51,14 +50,9 @@ class MergeSortUseCase {
         }
         for (k in left..right) {
             list[k] = temp[k - left]
-            // Jelöljük meg azokat az elemeket, amelyeket cserélünk
-            _mergeSortInfo.emit(MergeSortInfo(k, k - left, true, false))
             emit(list.toList())
             delay(500)
         }
         emit(list.toList())
     }
-
-
-
 }

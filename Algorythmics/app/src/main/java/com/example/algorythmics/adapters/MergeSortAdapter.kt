@@ -28,26 +28,23 @@ class MergeSortAdapter : ListAdapter<ListUiItem, MergeSortAdapter.ViewHolder>(Di
         val item = getItem(position)
         holder.textView.text = item.value.toString()
         holder.textView.gravity = Gravity.CENTER
+        val height = calculateHeight(item.value)
+        holder.textView.layoutParams.height = height
 
-        val initialColor = Color.parseColor("#1BDBBE")
-        val comparisonColor = Color.parseColor("#FF5733")
-        val foundColor = Color.parseColor("#FFA500")
-        val swappedColor = Color.parseColor("#FFFF00") // Új szín a csere jelzésére
-
-        // Az aktuális elem háttérszíne az összehasonlítás, találat vagy csere alapján
         val backgroundColor = when {
-            item.isCurrentlyCompared -> comparisonColor
-            item.isFound -> foundColor
-            item.needsColorUpdate -> swappedColor // Ha színezést igényel
-            else -> initialColor
+            item.isCurrentlyCompared -> Color.parseColor("#FF5733") // Red color for compared items
+            item.isSorted -> Color.parseColor("#A9A9A9") // Grey color for sorted items
+            item.isFound -> Color.parseColor("#FFA500") // Orange color for found items
+            else -> Color.parseColor("#63A46C") // Default color
         }
 
         holder.itemView.setBackgroundColor(backgroundColor)
     }
 
-
-    fun updateList(newList: List<ListUiItem>) {
-        submitList(newList)
+    private fun calculateHeight(value: Int): Int {
+        val minHeight = 100
+        val maxHeight = 400
+        return minHeight + (value * (maxHeight - minHeight) / 150)
     }
 
     companion object {
