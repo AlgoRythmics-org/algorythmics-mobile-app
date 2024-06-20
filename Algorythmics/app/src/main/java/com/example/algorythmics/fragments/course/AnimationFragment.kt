@@ -24,6 +24,8 @@ import com.example.algorythmics.adapters.BinarySearchAdapter
 import com.example.algorythmics.adapters.MergeSortAdapter
 import com.example.algorythmics.adapters.SelectionSortListAdapter
 import com.example.algorythmics.adapters.SortedListAdapter
+import com.example.algorythmics.databinding.FragmentAnimationBinding
+import com.example.algorythmics.databinding.FragmentQuizBinding
 import com.example.algorythmics.presentation.BinarySearchViewModel
 import com.example.algorythmics.presentation.BubbleSortViewModel
 import com.example.algorythmics.presentation.HeapSortViewModel
@@ -48,6 +50,7 @@ class AnimationFragment : Fragment() {
     private val heapSortViewModel: HeapSortViewModel by activityViewModels()
     private lateinit var btnShuffle: Button
     private lateinit var btnStep: Button
+    private lateinit var btnStart: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var sortedListAdapter: SortedListAdapter
     private lateinit var selectionSortListAdapter: SelectionSortListAdapter
@@ -58,12 +61,18 @@ class AnimationFragment : Fragment() {
     private lateinit var tvAnimationSteps: TextView
     private lateinit var backBtn3: ImageView
 
+    private lateinit var btnRestart: Button
+
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+
         val context = requireContext()
 
         // Fő layout létrehozása
@@ -90,7 +99,7 @@ class AnimationFragment : Fragment() {
             setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
             setOnClickListener {
                 requireActivity().onBackPressed()
-                bubbleSortViewModel.cancelSorting()
+                //bubbleSortViewModel.cancelSorting()
             }
         }
         mainLayout.addView(backBtn3)
@@ -171,38 +180,70 @@ class AnimationFragment : Fragment() {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 1f
             ).apply {
-                setMargins(8, 40, 16, 120) // Felfelé mozgatás
+                setMargins(8, 40, 16, 120)
             }
             text = "Step"
             textSize = 18f
             background = ContextCompat.getDrawable(context, R.drawable.button_rounded_corner)
             setOnClickListener {
                 handleStepButtonClick()
+                btnShuffle.isEnabled = false
+                btnStart.isEnabled = false
+
             }
         }
         buttonLayout.addView(btnStep)
 
         // Start gomb létrehozása és hozzáadása
-        val btnStart = Button(context).apply {
+        btnStart = Button(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 0,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 1f
             ).apply {
-                setMargins(8, 40, 8, 120) // Felfelé mozgatás
+                setMargins(8, 40, 8, 120)
             }
             text = "Start"
             textSize = 18f
             background = ContextCompat.getDrawable(context, R.drawable.button_rounded_corner)
             setOnClickListener {
                 handleStartButtonClick()
+                btnShuffle.isEnabled = false
+                btnStep.isEnabled = false
+                btnRestart.visibility = View.VISIBLE
+                btnStart.visibility = View.GONE
+
             }
         }
         buttonLayout.addView(btnStart)
 
+    //restartbtn
+        btnRestart = Button(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            ).apply {
+                setMargins(8, 40, 8, 120)
+            }
+            text = "Restart"
+            textSize = 18f
+            background = ContextCompat.getDrawable(context, R.drawable.button_rounded_corner)
+            setOnClickListener {
+                handleRestartButtonClick()
+                btnShuffle.isEnabled = false
+                btnStep.isEnabled = false
+            }
+            visibility = View.GONE
+        }
+        buttonLayout.addView(btnRestart)
+
+
         mainLayout.addView(buttonLayout)
 
         return mainLayout
+
+
     }
 
 
@@ -210,6 +251,7 @@ class AnimationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         algorithmId = arguments?.getString("algorithmId") ?: ""
+
 
         sortedListAdapter = SortedListAdapter()
         selectionSortListAdapter = SelectionSortListAdapter()
@@ -288,6 +330,11 @@ class AnimationFragment : Fragment() {
                 shellSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
                     sortedListAdapter.submitList(it)
                 })
+                shellSortViewModel.comparisonMessage.observe(
+                    viewLifecycleOwner,
+                    Observer { message ->
+                        tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
+                    })
             }
 
             "653d3aa2ce1b18cbd8bd14b5" -> {
@@ -306,6 +353,12 @@ class AnimationFragment : Fragment() {
                 mergeSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
                     mergeSortAdapter.submitList(it)
                 })
+                mergeSortViewModel.mergeSortSteps.observe(
+                    viewLifecycleOwner,
+                    Observer { message ->
+                        tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
+                    })
+
             }
 
             "653d3cf5ce1b18cbd8bd14b8" -> {
@@ -351,16 +404,44 @@ class AnimationFragment : Fragment() {
                     })
             }
 
-            else -> {
+            "653d3b95ce1b18cbd8bd14b6" -> {
                 heapSortViewModel.listToSort.observe(viewLifecycleOwner, Observer {
-                    sortedListAdapter.submitList(it)
+                    sortedListAdapter.submitList(it.toList())
                 })
+                heapSortViewModel.comparisonMessage.observe(
+                    viewLifecycleOwner,
+                    Observer { message ->
+                        tvAnimationSteps.text = tvAnimationSteps.text.toString() + "\n" + message
+                    })
+
             }
         }
     }
 
     private fun Int.dpToPx(): Int {
         return (this * resources.displayMetrics.density).toInt()
+    }
+
+    private fun handleRestartButtonClick() {
+        when (algorithmId) {
+            "653d32ffce1b18cbd8bd14b2" -> insertionSortViewModel.restartInsertionSort()
+            "65b8db1995d5f3a10bccd361" -> bubbleSortViewModel.restartBubbleSort()
+            "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.restartSelectionSort()
+            "653d3aa2ce1b18cbd8bd14b5" -> quickSortViewModel.restartQuickSort()
+            "653d3c49ce1b18cbd8bd14b7" -> shellSortViewModel.restartShellSort()
+            "653d3b95ce1b18cbd8bd14b6" -> heapSortViewModel.restartHeapSort()
+           "653d36ecce1b18cbd8bd14b4" -> mergeSortViewModel.restartMergeSort()
+           "653d3cf5ce1b18cbd8bd14b8" -> {
+                val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
+                linearSearchViewModel.restartLinearSearch(searchNumber)
+            }
+
+            "653d3dfece1b18cbd8bd14b9" -> {
+                val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
+                binarySearchViewModel.restartBinarySearch(searchNumber)
+            }
+        }
+
     }
 
     private fun handleStartButtonClick() {
@@ -370,6 +451,8 @@ class AnimationFragment : Fragment() {
             "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.startSelectionSorting()
             "653d3aa2ce1b18cbd8bd14b5" -> quickSortViewModel.startQuickSorting()
             "653d3c49ce1b18cbd8bd14b7" -> shellSortViewModel.startShellSorting()
+            "653d3b95ce1b18cbd8bd14b6" -> heapSortViewModel.startHeapSorting()
+            "653d36ecce1b18cbd8bd14b4" -> mergeSortViewModel.startMergeSorting()
             "653d3cf5ce1b18cbd8bd14b8" -> {
                 val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
                 linearSearchViewModel.startLinearSearch(searchNumber)
@@ -380,6 +463,7 @@ class AnimationFragment : Fragment() {
                 binarySearchViewModel.startBinarySearch(searchNumber)
             }
         }
+
     }
 
     private fun handleShuffleButtonClick() {
@@ -389,23 +473,35 @@ class AnimationFragment : Fragment() {
             "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.shuffleList() //Selection sort
             "65b8db1995d5f3a10bccd361" -> bubbleSortViewModel.shuffleList() //Bubble sort
             "653d3aa2ce1b18cbd8bd14b5" -> quickSortViewModel.shuffleList() //Quick sort
+            "653d3c49ce1b18cbd8bd14b7" -> shellSortViewModel.shuffleList() //Shell sort
+            "653d3b95ce1b18cbd8bd14b6" -> heapSortViewModel.shuffleList() //Heap sort
+            "653d36ecce1b18cbd8bd14b4" -> mergeSortViewModel.shuffleList() //Merge sort
         }
     }
 
     private fun handleStepButtonClick() {
-        //  val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
+
         when (algorithmId) {
             "653d32ffce1b18cbd8bd14b2" -> insertionSortViewModel.stepInsertionSort() //Insertion sort
             "653d35f6ce1b18cbd8bd14b3" -> selectionSortViewModel.stepSelectionSorting() //Selection sort
-            //  "653d3cf5ce1b18cbd8bd14b8" -> linearSearchViewModel.stepLinearSearch(searchNumber) //Linear search
             "65b8db1995d5f3a10bccd361" -> bubbleSortViewModel.stepSorting() //Bubble sort
             "653d3aa2ce1b18cbd8bd14b5" -> quickSortViewModel.stepQuickSorting() //Quick sort
-            //   "653d3dfece1b18cbd8bd14b9" -> binarySearchViewModel.stepBinarySearch(searchNumber)
+            "653d3c49ce1b18cbd8bd14b7" -> shellSortViewModel.stepShellSort() //Shell sort
+            "653d36ecce1b18cbd8bd14b4" -> mergeSortViewModel.mergeSortStep() //Merge sort
+            "653d3b95ce1b18cbd8bd14b6" -> heapSortViewModel.stepHeapSort() //Heap sort
+            "653d3cf5ce1b18cbd8bd14b8" -> {
+                val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
+                linearSearchViewModel.stepLinearSearch(searchNumber)
+            }
+
+            "653d3dfece1b18cbd8bd14b9" -> {
+                val searchNumber = etSearchNumber.text.toString().toIntOrNull() ?: return
+                binarySearchViewModel.stepBinarySearch(searchNumber)
+            }
         }
     }
 
+
 }
-
-
 
 

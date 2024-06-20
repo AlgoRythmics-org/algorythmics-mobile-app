@@ -1,6 +1,7 @@
 package com.example.algorythmics.presentation
 
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 
 class HeapSortViewModel(private val heapSortUseCase: HeapSortUseCase = HeapSortUseCase()) : ViewModel() {
 
+    private var originalList = mutableListOf<ListUiItem>()
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
@@ -44,10 +46,12 @@ class HeapSortViewModel(private val heapSortUseCase: HeapSortUseCase = HeapSortU
         }
         _listToSort.value = list
         heapSize = list.size
+        originalList = list
     }
 
     fun startHeapSorting() {
-        viewModelScope.launch {
+        currentSortingJob?.cancel()
+        currentSortingJob = viewModelScope.launch {
             val list = _listToSort.value!!.toMutableList()
             var sortingFinished = false
 
@@ -174,5 +178,20 @@ class HeapSortViewModel(private val heapSortUseCase: HeapSortUseCase = HeapSortU
             heapify(list, largest)
         }
     }
+
+    fun restartHeapSort() {
+        viewModelScope.launch {
+            currentSortingJob?.cancel()
+            _animationSteps.value = ""
+
+            val initialList = originalList.map { it.copy(isSorted = false, isCurrentlyCompared = false) }
+            _listToSort.value = initialList
+            _comparisonMessage.value = ""
+
+            startHeapSorting()
+        }
+    }
+
+
 
 }

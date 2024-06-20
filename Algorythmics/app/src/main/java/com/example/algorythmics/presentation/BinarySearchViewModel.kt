@@ -5,11 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class BinarySearchViewModel : ViewModel() {
+
+    private var originalList = mutableListOf<ListUiItem>()
 
     private val _listToSearch = MutableLiveData<MutableList<ListUiItem>>()
     val listToSearch: LiveData<MutableList<ListUiItem>> get() = _listToSearch
@@ -22,6 +25,8 @@ class BinarySearchViewModel : ViewModel() {
 
     private val _comparisonMessage = MutableLiveData<String>()
     val comparisonMessage: LiveData<String> get() = _comparisonMessage
+
+    private var currentSortingJob: Job? = null
 
     private var isSearching = false
 
@@ -39,16 +44,20 @@ class BinarySearchViewModel : ViewModel() {
                     id = it,
                     isCurrentlyCompared = false,
                     value = Random.nextInt(100),
+
                 )
             )
         }
         // Sort the list for binary search
         list.sortBy { it.value }
         _listToSearch.value = list
+        originalList = list
     }
 
     fun startBinarySearch(searchNumber: Int) {
-        viewModelScope.launch {
+        currentSortingJob?.cancel()
+
+        currentSortingJob =viewModelScope.launch {
             _searchResult.value = null
             val list = _listToSearch.value ?: return@launch
             var low = 0
@@ -183,5 +192,20 @@ class BinarySearchViewModel : ViewModel() {
     }
     private fun updateList(updatedList: MutableList<ListUiItem>) {
         _listToSearch.value = updatedList
+    }
+
+    fun restartBinarySearch(searchNumber: Int) {
+        viewModelScope.launch {
+            currentSortingJob?.cancel()
+
+            isSearching = false
+
+            _searchResult.value = null
+            _comparisonMessage.value = ""
+
+            _listToSearch.value = originalList.map { it.copy(isCurrentlyCompared = false, isFound = false) }.toMutableList()
+
+            startBinarySearch(searchNumber)
+        }
     }
 }

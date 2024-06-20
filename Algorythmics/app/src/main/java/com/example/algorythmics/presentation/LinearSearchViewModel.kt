@@ -5,12 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class LinearSearchViewModel  : ViewModel() {
 
+    private var originalList = mutableListOf<ListUiItem>()
     private val _listToSearch = MutableLiveData<MutableList<ListUiItem>>()
     val listToSearch: LiveData<MutableList<ListUiItem>> get() = _listToSearch
 
@@ -30,11 +32,15 @@ class LinearSearchViewModel  : ViewModel() {
     private val _isStepButtonEnabled = MutableLiveData<Boolean>()
     val isStepButtonEnabled: LiveData<Boolean> get() = _isStepButtonEnabled
 
+    private var currentSortingJob: Job? = null
+
     // searchPosition a megtalált elem pozícióját tárolja
     private var searchPosition: Int? = null
 
     fun startLinearSearch(searchNumber: Int) {
-        viewModelScope.launch {
+        currentSortingJob?.cancel()
+
+        currentSortingJob = viewModelScope.launch {
             _searchResult.value = null
             val list = _listToSearch.value ?: return@launch
             var foundIndex: Int? = null
@@ -89,6 +95,7 @@ class LinearSearchViewModel  : ViewModel() {
             )
         }
         _listToSearch.value = list
+        originalList = list
     }
 
     fun shuffleList() {
@@ -152,5 +159,23 @@ class LinearSearchViewModel  : ViewModel() {
 
         fun resetStepButton() {
         _isStepButtonEnabled.value = true
+    }
+
+    fun restartLinearSearch(searchNumber: Int) {
+        viewModelScope.launch {
+            currentSortingJob?.cancel()
+
+            totalSteps = 0
+            currentStep = 0
+            isSearching = false
+            searchPosition = null
+
+            _searchResult.value = null
+            _comparisonMessage.value = ""
+
+            _listToSearch.value = originalList.map { it.copy(isCurrentlyCompared = false, isFound = false) }.toMutableList()
+
+            startLinearSearch(searchNumber)
+        }
     }
 }

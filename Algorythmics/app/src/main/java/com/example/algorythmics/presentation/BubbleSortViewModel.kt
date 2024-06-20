@@ -14,6 +14,8 @@ class BubbleSortViewModel(
     private val bubbleSortUseCase: BubbleSortUseCase = BubbleSortUseCase(),
 ) : SortingViewModel() {
 
+    private var originalList = mutableListOf<ListUiItem>()
+
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
@@ -23,18 +25,21 @@ class BubbleSortViewModel(
     private val _comparisonMessage = MutableLiveData<String>()
     val comparisonMessage: LiveData<String> get() = _comparisonMessage
 
+    private var currentSortingJob: Job? = null
+
     init {
         val list = mutableListOf<ListUiItem>()
         for ((i, item) in bubbleSortUseCase.items.withIndex()) {
             list.add(ListUiItem(id = i, value = item))
         }
         _listToSort.value = list
+        originalList = list
     }
 
     override fun startSorting() {
 
-        sortingJob?.cancel()  // Megszakítjuk az előző sortingJob-ot, ha volt
-        sortingJob = viewModelScope.launch {
+        currentSortingJob?.cancel()
+        currentSortingJob = viewModelScope.launch {
             super.startSorting()
             var pass = 0
             var lastSortedIndex = _listToSort.value!!.lastIndex
@@ -149,23 +154,24 @@ class BubbleSortViewModel(
         }
     }
 
-
-
     fun shuffleList() {
         val list = _listToSort.value ?: return
         val shuffledList = list.shuffled()
         _listToSort.value = shuffledList.toMutableList()
     }
 
-    private var sortingJob: Job? = null
-    fun cancelSorting() {
-        sortingJob?.cancel()
-    }
 
-    override fun onCleared() {
-        super.onCleared()
-        sortingJob?.cancel()  // ViewModel élettartama véget ér, megszakítjuk a sortingJob-ot
-    }
+    fun restartBubbleSort() {
+        viewModelScope.launch {
+            currentSortingJob?.cancel()
 
+
+            _animationSteps.value = ""
+
+            _listToSort.value = originalList.map { it.copy(isSorted = false, isCurrentlyCompared = false, color = Color.Transparent) }
+
+            startSorting()
+        }
+    }
 
 }

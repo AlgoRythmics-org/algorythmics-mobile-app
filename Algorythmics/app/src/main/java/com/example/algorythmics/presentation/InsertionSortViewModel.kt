@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.algorythmics.animation.SortingViewModel
 import com.example.algorythmics.use_case.InsertionSortUseCase
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -29,6 +30,8 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
     private var phase = 0
     private var comparisonIndex = 0
 
+    private var currentSortingJob: Job? = null
+
 
     init {
         val list = mutableListOf<ListUiItem>()
@@ -45,7 +48,9 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
     }
 
     fun startInsertionSorting() {
-        viewModelScope.launch {
+        currentSortingJob?.cancel()
+
+        currentSortingJob = viewModelScope.launch {
             _sortedList.value?.let { initialList ->
                 val newList = initialList.toMutableList()
                 newList[0] = newList[0].copy(isSorted = true)
@@ -161,4 +166,24 @@ class InsertionSortViewModel(private val insertionSortUseCase: InsertionSortUseC
         val shuffledList = list.shuffled()
         _sortedList.value = shuffledList
     }
+
+    fun restartInsertionSort() {
+        viewModelScope.launch {
+            currentSortingJob?.cancel()
+
+            currentStep = 0
+            isSorting = false
+            phase = 0
+            comparisonIndex = 0
+
+            _animationSteps.value = ""
+
+            val original = _originalList.value ?: return@launch
+            _sortedList.value = original.map { it.copy(isSorted = false, isCurrentlyCompared = false, color = Color.Transparent) }
+
+            startInsertionSorting()
+        }
+    }
+
+
 }

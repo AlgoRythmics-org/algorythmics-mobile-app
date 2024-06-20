@@ -1,16 +1,20 @@
 package com.example.algorythmics.presentation
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.algorythmics.use_case.SelectionSortUseCase
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class SelectionSortViewModel
     (private val selectionSortUseCase: SelectionSortUseCase = SelectionSortUseCase()) : ViewModel() {
+
+    private var originalList = mutableListOf<ListUiItem>()
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
@@ -19,6 +23,8 @@ class SelectionSortViewModel
 
     private val _comparisonMessage = MutableLiveData<String>()
     val comparisonMessage: LiveData<String> get() = _comparisonMessage
+
+    private var currentSortingJob: Job? = null
 
     private var minIndex = 0
     private var i = 0
@@ -36,10 +42,14 @@ class SelectionSortViewModel
             )
         }
         _listToSort.value = list
+        originalList = list
     }
 
+
     fun startSelectionSorting() {
-        viewModelScope.launch {
+        currentSortingJob?.cancel()
+
+        currentSortingJob = viewModelScope.launch {
             val initialList = _listToSort.value!!.map { it.copy(isCurrentlyCompared = false, isSorted = false) }
             _listToSort.value = initialList
 
@@ -148,5 +158,20 @@ class SelectionSortViewModel
     }
 
 
+    fun restartSelectionSort() {
+        viewModelScope.launch {
+            currentSortingJob?.cancel()
+
+            minIndex = 0
+            i = 0
+            step = 0
+
+            _animationSteps.value = ""
+
+            _listToSort.value = originalList.map { it.copy(isSorted = false, isCurrentlyCompared = false, color = Color.Transparent) }
+
+            startSelectionSorting()
+        }
+    }
 
 }

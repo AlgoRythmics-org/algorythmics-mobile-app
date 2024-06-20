@@ -28,8 +28,10 @@ class BinarySearchAdapter : ListAdapter<ListUiItem, BinarySearchAdapter.ViewHold
         val item = getItem(position)
         holder.textView.text = item.value.toString()
         holder.textView.gravity = Gravity.CENTER
+        val height = calculateHeight(item.value)
+        holder.textView.layoutParams.height = height
 
-        val initialColor = Color.parseColor("#1BDBBE")
+        val initialColor = Color.parseColor("#63A46C")
         val comparisonColor = Color.parseColor("#FF5733")
         val foundColor = Color.parseColor("#FFA500")
         val grayColor = Color.parseColor("#A9A9A9")
@@ -43,6 +45,14 @@ class BinarySearchAdapter : ListAdapter<ListUiItem, BinarySearchAdapter.ViewHold
         }
 
          holder.itemView.setBackgroundColor(backgroundColor)
+    }
+
+    private fun calculateHeight(value: Int): Int {
+
+        val minHeight = 100
+        val maxHeight = 400
+
+        return minHeight + (value * (maxHeight - minHeight) / 100)
     }
 
     companion object {

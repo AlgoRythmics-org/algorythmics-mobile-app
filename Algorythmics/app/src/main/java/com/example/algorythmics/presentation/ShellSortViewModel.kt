@@ -14,6 +14,7 @@ import kotlin.random.Random
 
 class ShellSortViewModel(private val shellSortUseCase: ShellSortUseCase = ShellSortUseCase()) : ViewModel() {
 
+    private var originalList = mutableListOf<ListUiItem>()
     private val _listToSort = MutableLiveData<List<ListUiItem>>()
     val listToSort: LiveData<List<ListUiItem>> get() = _listToSort
 
@@ -23,11 +24,9 @@ class ShellSortViewModel(private val shellSortUseCase: ShellSortUseCase = ShellS
     private val _comparisonMessage = MutableLiveData<String>()
     val comparisonMessage: LiveData<String> get() = _comparisonMessage
 
-    private var currentStepIndex = 0
-    private var isSortingInProgress = false
+    private var currentSortingJob: Job? = null
 
     private var gap = 0
-    private var pass = 0
     private var currentComparisonIndex = 0
 
     init {
@@ -43,10 +42,12 @@ class ShellSortViewModel(private val shellSortUseCase: ShellSortUseCase = ShellS
         }
         _listToSort.value = list
         gap = list.size / 2
+        originalList = list
     }
 
     fun startShellSorting() {
-        viewModelScope.launch {
+        currentSortingJob?.cancel()
+        currentSortingJob =  viewModelScope.launch {
             shellSortUseCase.sort(_listToSort.value!!.map { it.value }.toMutableList())
                 .collect { swapInfo ->
                     val currentItemIndex = swapInfo.currentItem
@@ -148,6 +149,19 @@ class ShellSortViewModel(private val shellSortUseCase: ShellSortUseCase = ShellS
                 currentComparisonIndex = 0
             }
 
+        }
+    }
+
+    fun restartShellSort() {
+        viewModelScope.launch {
+            currentSortingJob?.cancel()
+
+
+            _animationSteps.value = ""
+
+            _listToSort.value = originalList.map { it.copy(isSorted = false, isCurrentlyCompared = false, color = Color.Transparent) }
+
+            startShellSorting()
         }
     }
 

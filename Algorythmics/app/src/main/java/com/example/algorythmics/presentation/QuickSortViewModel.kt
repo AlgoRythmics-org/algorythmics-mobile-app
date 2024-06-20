@@ -1,9 +1,11 @@
 package com.example.algorythmics.presentation
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -19,6 +21,10 @@ class QuickSortViewModel : ViewModel() {
     private val _comparisonMessage = MutableLiveData<String>()
     val comparisonMessage: LiveData<String> get() = _comparisonMessage
 
+    private var currentSortingJob: Job? = null
+
+    private var originalList = mutableListOf<ListUiItem>()
+
     init {
         val list = mutableListOf<ListUiItem>()
         for (i in 0 until 10) {
@@ -31,10 +37,13 @@ class QuickSortViewModel : ViewModel() {
             )
         }
         _listToSort.value = list
+        originalList = list
     }
 
     fun startQuickSorting() {
-        viewModelScope.launch {
+        currentSortingJob?.cancel()
+
+        currentSortingJob = viewModelScope.launch {
             val list = _listToSort.value!!.toMutableList()
 
             quickSort(list, 0, list.size - 1)
@@ -221,6 +230,19 @@ class QuickSortViewModel : ViewModel() {
                 }
                 _listToSort.value = list.toList()
             }
+        }
+    }
+
+    fun restartQuickSort() {
+        viewModelScope.launch {
+            currentSortingJob?.cancel()
+
+
+            _animationSteps.value = ""
+
+            _listToSort.value = originalList.map { it.copy(isSorted = false, isCurrentlyCompared = false, color = Color.Transparent) }
+
+            startQuickSorting()
         }
     }
 }
