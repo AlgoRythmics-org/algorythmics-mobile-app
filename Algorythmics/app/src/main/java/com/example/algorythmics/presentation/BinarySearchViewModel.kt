@@ -38,7 +38,7 @@ class BinarySearchViewModel : ViewModel() {
 
     init {
         val list = mutableListOf<ListUiItem>()
-        repeat(9) {
+        repeat(10) {
             list.add(
                 ListUiItem(
                     id = it,
