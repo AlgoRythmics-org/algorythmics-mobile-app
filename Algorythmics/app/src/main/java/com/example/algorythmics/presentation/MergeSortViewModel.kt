@@ -1,3 +1,4 @@
+
 package com.example.algorythmics.presentation
 
 import androidx.compose.ui.graphics.Color
@@ -9,7 +10,6 @@ import com.example.algorythmics.use_case.MergeSortUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeSortUseCase()) : ViewModel() {
     private var originalList = mutableListOf<ListUiItem>()
@@ -25,7 +25,6 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
 
     private val _currentStepLiveData = MutableLiveData<Int>()
     val currentStepLiveData: LiveData<Int> get() = _currentStepLiveData
-
 
     private var currentSortingJob: Job? = null
 
@@ -51,7 +50,7 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
 
     fun startMergeSorting() {
         currentSortingJob?.cancel()
-        currentSortingJob =viewModelScope.launch {
+        currentSortingJob = viewModelScope.launch {
             val originalList = _listToSort.value ?: return@launch
             mergeSort(originalList.toMutableList(), 0, originalList.size - 1)
         }
@@ -62,11 +61,22 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
             val m = l + (r - l) / 2
             mergeSort(arr, l, m)
             mergeSort(arr, m + 1, r)
-            merge(arr, l, m, r)
+            merge(arr, l, m, r, true)
         }
     }
 
-    private suspend fun merge(arr: MutableList<ListUiItem>, l: Int, m: Int, r: Int) {
+    private suspend fun mergeStep(arr: MutableList<ListUiItem>, l: Int, r: Int) {
+        if (l < r) {
+            val m = l + (r - l) / 2
+            mergeStep(arr, l, m)
+            mergeStep(arr, m + 1, r)
+            merge(arr, l, m, r, false)
+            _currentStepLiveData.postValue(++currentStep)
+            mergeSortInProgress = false
+        }
+    }
+
+    private suspend fun merge(arr: MutableList<ListUiItem>, l: Int, m: Int, r: Int, postStepMessage: Boolean) {
         val leftArray = arr.subList(l, m + 1).toMutableList()
         val rightArray = arr.subList(m + 1, r + 1).toMutableList()
 
@@ -90,8 +100,10 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
             arr[k].isCurrentlyCompared = false
             arr[k].isSorted = true
 
-            val stepMessage = "Összefésülés: ${arr[k].value}"
-            _mergeSortSteps.postValue(stepMessage)
+            if (postStepMessage) {
+                val stepMessage = "Összefésülés: ${arr[k].value}"
+                _mergeSortSteps.postValue(stepMessage)
+            }
 
             k++
         }
@@ -100,8 +112,10 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
             arr[k] = leftArray[i].copy()
             arr[k].isCurrentlyCompared = false
             arr[k].isSorted = true
-            val stepMessage = "Maradék bal oldali elem másolása: ${arr[k].value}"
-            _mergeSortSteps.postValue(stepMessage)
+            if (postStepMessage) {
+                val stepMessage = "Maradék bal oldali elem másolása: ${arr[k].value}"
+                _mergeSortSteps.postValue(stepMessage)
+            }
             i++
             k++
         }
@@ -110,8 +124,10 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
             arr[k] = rightArray[j].copy()
             arr[k].isCurrentlyCompared = false
             arr[k].isSorted = true
-            val stepMessage = "Maradék jobb oldali elem másolása: ${arr[k].value}"
-            _mergeSortSteps.postValue(stepMessage)
+            if (postStepMessage) {
+                val stepMessage = "Maradék jobb oldali elem másolása: ${arr[k].value}"
+                _mergeSortSteps.postValue(stepMessage)
+            }
             j++
             k++
         }
@@ -133,19 +149,16 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
         }
     }
 
-
     private suspend fun performMergeSortStep(arr: MutableList<ListUiItem>, l: Int, r: Int) {
         if (l < r) {
             val m = l + (r - l) / 2
             performMergeSortStep(arr, l, m)
             performMergeSortStep(arr, m + 1, r)
-            merge(arr, l, m, r)
+            mergeStep(arr, l, m)
             _currentStepLiveData.postValue(++currentStep)
             mergeSortInProgress = false
         }
     }
-
-
 
     fun shuffleList() {
         val list = _listToSort.value ?: return
@@ -155,14 +168,9 @@ class MergeSortViewModel(private val mergeSortUseCase: MergeSortUseCase = MergeS
     fun restartMergeSort() {
         viewModelScope.launch {
             currentSortingJob?.cancel()
-
-
             _mergeSortSteps.value = ""
-
             _listToSort.value = originalList.map { it.copy(isSorted = false, isCurrentlyCompared = false, color = Color.Transparent) }
-
             startMergeSorting()
         }
     }
-
 }
