@@ -4,4 +4,37 @@
     <color name="white">#FFFFFFFF</color>
     <color name="blue">#1BDBBE</color>
     <color name="grey">#72A6A6</color>
+    <color name="pale_blue">#B0D5D5</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="cute_pink">#FF9EC7</color>
+    <color name="cute_pink2">#FF9EC7</color>
+    <color name="pale_white">#D9E1E1E1</color>
+    <color name="pale_purple">#D3AEDA</color>
+    <color name="reddish">#D8A3A3</color>
+    <color name="reddish2">#B37171</color>
+    <color name="transparent_cute_pink">#80FF9EC7</color>
+    <color name="transparent_white2">#60FFFFFF</color>
+    <color name="transparent_white">#A5FFFFFF</color>
+    <color name="transparent_black">#60000000</color>
+    <color name="black2">#80000000</color>
+    <color name="green">#4CAF50</color>
+    <color name="orange">#FF5722</color>
+    <color name="red">#D6091A</color>
+    <color name="light_blue_400">#FF29B6F6</color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="gray_400">#FFBDBDBD</color>
+    <color name="gray_600">#FF757575</color>
+    <color name="gray">#616161</color>
+
+    <color name="colorPrimary">#ffffff</color>
+    <color name="colorPrimaryDark">#f1f1f1</color>
+    <color name="colorYellow">#EEA243</color>
+    <color name="colorGradStart">#FDC830</color>
+    <color name="colorGradEnd">#63A46C</color>
+    <color name="colorWhiteTransparent">#7CFFFFFF</color>
+    <color name="colorAccent">#FF4081</color>
 </resources>
