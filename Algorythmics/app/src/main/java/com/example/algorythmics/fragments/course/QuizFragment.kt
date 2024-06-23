@@ -23,7 +23,7 @@ class QuizFragment : Fragment(), QuestionAdapter.Score {
     private var _binding: FragmentQuizBinding? = null
     private val binding get() = _binding!!
 
-    private var position: Int = 0
+    private var position: Int = 1
     private lateinit var receivedList: MutableList<QuizModel>
     private var allScore = 0
 

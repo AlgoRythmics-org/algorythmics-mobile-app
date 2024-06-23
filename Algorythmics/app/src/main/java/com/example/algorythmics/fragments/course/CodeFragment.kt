@@ -200,7 +200,7 @@ class CodeFragment : Fragment() {
                     submitButton = Button(context).apply {
                         text = "Submit"
                         textSize = 16f
-                        setBackgroundColor(ContextCompat.getColor(context, R.color.blue))
+                        setBackgroundColor(ContextCompat.getColor(context, R.color.colorYellow))
                         setTextColor(ContextCompat.getColor(context, android.R.color.white))
                         background = ContextCompat.getDrawable(context, R.drawable.rounded_button)
                         isEnabled = false
@@ -251,10 +251,12 @@ class CodeFragment : Fragment() {
             addView(mainLinearLayout)
         }
         rootView.addView(scrollView)
-        rootView.addView(backBtn)  // Add backBtn last to ensure it's on top
+        rootView.addView(backBtn)
 
         return rootView
     }
+
+
 
     private fun createAnswerEditText(answer: String): EditText {
         return EditText(context).apply {
@@ -268,9 +270,8 @@ class CodeFragment : Fragment() {
             ).apply {
                 setMargins(10, 20, 10, 20)
             }
-            setBackgroundColor(ContextCompat.getColor(context, R.color.colorGradEnd))
+            setBackgroundResource(R.drawable.roundes_corner)
             elevation = 4f
-            setPadding(12, 12, 12, 12)
             setTextColor(resources.getColor(android.R.color.black))
             gravity = Gravity.CENTER
             minWidth = 100
@@ -280,6 +281,7 @@ class CodeFragment : Fragment() {
             }
         }
     }
+
 
     private fun handleAnswerClick(answerEditText: EditText, answer: String) {
         val firstEmptyEditText = findFirstEmptyEditText(view as ViewGroup)

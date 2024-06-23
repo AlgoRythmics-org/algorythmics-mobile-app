@@ -33,8 +33,10 @@ class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapte
         val item = getItem(position)
         holder.textView.text = item.value.toString()
         holder.textView.gravity = Gravity.CENTER
+        val height = calculateHeight(item.value)
+        holder.textView.layoutParams.height = height
 
-        val initialColor = Color.parseColor("#1BDBBE")
+        val initialColor = Color.parseColor("#63A46C")
         val smallestItemColor = Color.RED
         val sortedColor = Color.parseColor("#A9A9A9")
 
@@ -48,6 +50,13 @@ class SelectionSortListAdapter : ListAdapter<ListUiItem, SelectionSortListAdapte
         holder.itemView.setBackgroundColor(backgroundColor)
     }
 
+    private fun calculateHeight(value: Int): Int {
+
+        val minHeight = 100
+        val maxHeight = 400
+
+        return minHeight + (value * (maxHeight - minHeight) / 100)
+    }
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<ListUiItem>() {
             override fun areItemsTheSame(oldItem: ListUiItem, newItem: ListUiItem): Boolean {

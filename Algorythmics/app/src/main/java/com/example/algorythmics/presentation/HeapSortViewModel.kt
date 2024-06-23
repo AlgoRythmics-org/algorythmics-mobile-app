@@ -180,13 +180,15 @@ class HeapSortViewModel(private val heapSortUseCase: HeapSortUseCase = HeapSortU
     }
 
     fun restartHeapSort() {
+        currentSortingJob?.cancel()
         viewModelScope.launch {
-            currentSortingJob?.cancel()
             _animationSteps.value = ""
 
             val initialList = originalList.map { it.copy(isSorted = false, isCurrentlyCompared = false) }
             _listToSort.value = initialList
             _comparisonMessage.value = ""
+            heapSize = initialList.size
+            currentComparisonIndex = 0
 
             startHeapSorting()
         }

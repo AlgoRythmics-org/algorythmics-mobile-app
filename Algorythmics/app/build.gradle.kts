@@ -42,6 +42,11 @@ android {
 
 dependencies {
 
+
+
+
+    implementation ("com.airbnb.android:lottie:4.2.0")
+
     implementation ("androidx.constraintlayout:constraintlayout:2.1.3")
 
     implementation("com.google.android.flexbox:flexbox:3.0.0")
@@ -62,7 +67,7 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.0.5")
     implementation ("androidx.compose.material:material:1.0.5")
     implementation ("androidx.compose.ui:ui-tooling:1.0.5")
-
+    implementation ("androidx.compose.animation:animation:1.0.0")
 
 
 
@@ -76,6 +81,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-android:1.6.1")
     implementation("androidx.compose.material3:material3-android:1.2.0")
     implementation ("com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2")
+    implementation("com.google.ar.sceneform:filament-android:1.17.1")
 
     kapt("androidx.room:room-compiler:2.6.0")
 
